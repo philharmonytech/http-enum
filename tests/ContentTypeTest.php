@@ -2,16 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Philharmony\Http\Tests\Enum;
+namespace Philharmony\Http\Enum\Tests;
 
 use Philharmony\Http\Enum\ContentType;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use ValueError;
 
-/**
- * @psalm-suppress UnusedClass
- */
 class ContentTypeTest extends TestCase
 {
     public function testFromReturnsCorrectCase(): void
