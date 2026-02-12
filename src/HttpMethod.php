@@ -15,13 +15,17 @@ enum HttpMethod: string
     case PATCH = 'PATCH';
     case HEAD = 'HEAD';
     case OPTIONS = 'OPTIONS';
+    case TRACE = 'TRACE';
+    case CONNECT = 'CONNECT';
+
+    public function isSafe(): bool
+    {
+        return in_array($this, [self::GET, self::HEAD, self::OPTIONS, self::TRACE]);
+    }
 
     public function isIdempotent(): bool
     {
-        return match ($this) {
-            self::GET, self::PUT, self::DELETE, self::HEAD, self::OPTIONS => true,
-            self::POST, self::PATCH => false,
-        };
+        return in_array($this, [self::GET, self::HEAD, self::PUT, self::DELETE, self::OPTIONS, self::TRACE, self::CONNECT]);
     }
 
     public static function isValid(string $method): bool
