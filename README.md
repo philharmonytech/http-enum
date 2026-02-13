@@ -146,7 +146,15 @@ Represents media types as a backed enum (`string`) with parsing and detection ut
 | `tryFrom(string $value)` | Built-in — returns `null` if invalid |
 
 #### Static Group Methods (return `ContentType[]`):
-- `textBased()`, `json()`, `image()`, `audio()`, `video()`, `media()`, `font()`, `form()`, `binary()`
+- `textBased()`, 
+- `json()`, 
+- `image()`, 
+- `audio()`, 
+- `video()`, 
+- `media()`, 
+- `font()`, 
+- `form()`, 
+- `binary()`
 
 > Example: `ContentType::fromHeader('application/json; charset=utf-8')` → `ContentType::JSON`
 
