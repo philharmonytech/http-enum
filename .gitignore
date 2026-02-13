@@ -27,3 +27,9 @@ Thumbs.db
 /.vscode
 *.swp
 *.swo
+
+# Caches
+.phpstan/cache/
+.php-cs-fixer.cache
+coverage/
+docs/

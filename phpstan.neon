@@ -1,4 +1,7 @@
 parameters:
+    memoryLimit: 1G
+    bootstrapFiles:
+        - vendor/autoload.php
     level: 9
     paths:
         - src
