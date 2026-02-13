@@ -9,18 +9,23 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    if: >
+    if: |
       github.event.workflow_run.conclusion == 'success' &&
-      github.ref == 'refs/heads/main'
+      github.event.workflow_run.head_branch == 'main'
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Download coverage (PHP 8.4)
         uses: actions/download-artifact@v4
         with:
           name: coverage-report-php-8.4
           path: docs
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: docs
           publish_branch: gh-pages
+          commit_message: ${{ format('Update coverage report from {0}', github.sha) }}
