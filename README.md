@@ -1,8 +1,8 @@
 # philharmony/http-enum
 
-[![Analysis](https://github.com/philharmonytech/http-enum/actions/workflows/ci-analysis.yml/badge.svg)](https://github.com/philharmonytech/http-enum/actions/workflows/ci-analysis.yml)
-[![Tests](https://github.com/philharmonytech/http-enum/actions/workflows/ci-test.yml/badge.svg)](https://github.com/philharmonytech/http-enum/actions/workflows/ci-test.yml)
 [![Validate](https://github.com/philharmonytech/http-enum/actions/workflows/ci-validate.yml/badge.svg)](https://github.com/philharmonytech/http-enum/actions/workflows/ci-validate.yml)
+[![Analysis](https://github.com/philharmonytech/http-enum/actions/workflows/ci-analysis.yml/badge.svg)](https://github.com/philharmonytech/http-enum/actions/workflows/ci-analysis.yml)
+[![Test](https://github.com/philharmonytech/http-enum/actions/workflows/ci-test.yml/badge.svg)](https://github.com/philharmonytech/http-enum/actions/workflows/ci-test.yml)
 [![Deploy](https://github.com/philharmonytech/http-enum/actions/workflows/cd-pages.yml/badge.svg)](https://github.com/philharmonytech/http-enum/actions/workflows/cd-pages.yml)
 [![PHP Version](https://img.shields.io/badge/PHP-8.1%20to%208.4-8892BF.svg)](https://www.php.net/supported-versions.php)
 [![Latest Stable Version](https://img.shields.io/github/v/release/philharmonytech/http-enum?label=stable)](https://github.com/philharmonytech/http-enum/releases)
