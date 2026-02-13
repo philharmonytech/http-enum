@@ -57,7 +57,7 @@ enum ContentType: string
     public function isTextBased(): bool
     {
         return str_starts_with($this->value, 'text/') ||
-            in_array($this, [self::JSON, self::JAVASCRIPT, self::XML, self::CSV, self::MARKDOWN,]);
+            \in_array($this, [self::JSON, self::JAVASCRIPT, self::XML, self::CSV, self::MARKDOWN,], true);
     }
 
     public function isJson(): bool
@@ -93,14 +93,14 @@ enum ContentType: string
 
     public function isForm(): bool
     {
-        return in_array($this, [self::FORM_URLENCODED, self::FORM_DATA,], true);
+        return \in_array($this, [self::FORM_URLENCODED, self::FORM_DATA,], true);
     }
 
     public function isBinary(): bool
     {
         return $this->isMedia()
             || $this->isFont()
-            || in_array($this, [
+            || \in_array($this, [
                 self::PDF,
                 self::ZIP,
                 self::MSGPACK,

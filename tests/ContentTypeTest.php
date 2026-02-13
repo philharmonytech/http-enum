@@ -44,7 +44,7 @@ class ContentTypeTest extends TestCase
         }
 
         foreach (ContentType::cases() as $case) {
-            if (!in_array($case, ContentType::textBased(), true)) {
+            if (!\in_array($case, ContentType::textBased(), true)) {
                 $this->assertFalse($case->isTextBased());
             }
         }
@@ -57,7 +57,7 @@ class ContentTypeTest extends TestCase
         }
 
         foreach (ContentType::cases() as $case) {
-            if (!in_array($case, ContentType::json(), true)) {
+            if (!\in_array($case, ContentType::json(), true)) {
                 $this->assertFalse($case->isJson());
             }
         }
@@ -70,7 +70,7 @@ class ContentTypeTest extends TestCase
         }
 
         foreach (ContentType::cases() as $case) {
-            if (!in_array($case, ContentType::image(), true)) {
+            if (!\in_array($case, ContentType::image(), true)) {
                 $this->assertFalse($case->isImage());
             }
         }
@@ -83,7 +83,7 @@ class ContentTypeTest extends TestCase
         }
 
         foreach (ContentType::cases() as $case) {
-            if (!in_array($case, ContentType::audio(), true)) {
+            if (!\in_array($case, ContentType::audio(), true)) {
                 $this->assertFalse($case->isAudio());
             }
         }
@@ -96,7 +96,7 @@ class ContentTypeTest extends TestCase
         }
 
         foreach (ContentType::cases() as $case) {
-            if (!in_array($case, ContentType::video(), true)) {
+            if (!\in_array($case, ContentType::video(), true)) {
                 $this->assertFalse($case->isVideo());
             }
         }
@@ -109,7 +109,7 @@ class ContentTypeTest extends TestCase
         }
 
         foreach (ContentType::cases() as $case) {
-            if (!in_array($case, ContentType::media(), true)) {
+            if (!\in_array($case, ContentType::media(), true)) {
                 $this->assertFalse($case->isMedia());
             }
         }
@@ -122,7 +122,7 @@ class ContentTypeTest extends TestCase
         }
 
         foreach (ContentType::cases() as $case) {
-            if (!in_array($case, ContentType::font(), true)) {
+            if (!\in_array($case, ContentType::font(), true)) {
                 $this->assertFalse($case->isFont());
             }
         }
@@ -135,7 +135,7 @@ class ContentTypeTest extends TestCase
         }
 
         foreach (ContentType::cases() as $case) {
-            if (!in_array($case, ContentType::form(), true)) {
+            if (!\in_array($case, ContentType::form(), true)) {
                 $this->assertFalse($case->isForm());
             }
         }
@@ -148,7 +148,7 @@ class ContentTypeTest extends TestCase
         }
 
         foreach (ContentType::cases() as $case) {
-            if (!in_array($case, ContentType::binary(), true)) {
+            if (!\in_array($case, ContentType::binary(), true)) {
                 $this->assertFalse($case->isBinary());
             }
         }

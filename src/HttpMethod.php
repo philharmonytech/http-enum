@@ -20,12 +20,12 @@ enum HttpMethod: string
 
     public function isSafe(): bool
     {
-        return in_array($this, [self::GET, self::HEAD, self::OPTIONS, self::TRACE]);
+        return \in_array($this, [self::GET, self::HEAD, self::OPTIONS, self::TRACE], true);
     }
 
     public function isIdempotent(): bool
     {
-        return in_array($this, [self::GET, self::HEAD, self::PUT, self::DELETE, self::OPTIONS, self::TRACE, self::CONNECT]);
+        return \in_array($this, [self::GET, self::HEAD, self::PUT, self::DELETE, self::OPTIONS, self::TRACE, self::CONNECT], true);
     }
 
     public static function isValid(string $method): bool

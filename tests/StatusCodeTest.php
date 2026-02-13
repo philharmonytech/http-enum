@@ -38,7 +38,7 @@ class StatusCodeTest extends TestCase
         }
 
         foreach (StatusCode::cases() as $case) {
-            if (!in_array($case, StatusCode::informational(), true)) {
+            if (!\in_array($case, StatusCode::informational(), true)) {
                 $this->assertFalse($case->isInformational());
             }
         }
@@ -51,7 +51,7 @@ class StatusCodeTest extends TestCase
         }
 
         foreach (StatusCode::cases() as $case) {
-            if (!in_array($case, StatusCode::success(), true)) {
+            if (!\in_array($case, StatusCode::success(), true)) {
                 $this->assertFalse($case->isSuccess());
             }
         }
@@ -64,7 +64,7 @@ class StatusCodeTest extends TestCase
         }
 
         foreach (StatusCode::cases() as $case) {
-            if (!in_array($case, StatusCode::redirection(), true)) {
+            if (!\in_array($case, StatusCode::redirection(), true)) {
                 $this->assertFalse($case->isRedirection());
             }
         }
@@ -77,7 +77,7 @@ class StatusCodeTest extends TestCase
         }
 
         foreach (StatusCode::cases() as $case) {
-            if (!in_array($case, StatusCode::clientError(), true)) {
+            if (!\in_array($case, StatusCode::clientError(), true)) {
                 $this->assertFalse($case->isClientError());
             }
         }
@@ -90,7 +90,7 @@ class StatusCodeTest extends TestCase
         }
 
         foreach (StatusCode::cases() as $case) {
-            if (!in_array($case, StatusCode::serverError(), true)) {
+            if (!\in_array($case, StatusCode::serverError(), true)) {
                 $this->assertFalse($case->isServerError());
             }
         }
@@ -103,7 +103,7 @@ class StatusCodeTest extends TestCase
         }
 
         foreach (StatusCode::cases() as $case) {
-            if (!in_array($case, StatusCode::clientOrServerError(), true)) {
+            if (!\in_array($case, StatusCode::clientOrServerError(), true)) {
                 $this->assertFalse($case->isClientOrServerError());
             }
         }
