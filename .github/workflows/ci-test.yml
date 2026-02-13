@@ -41,7 +41,7 @@ jobs:
         run: phpunit --coverage-html coverage --coverage-text --colors=always
 
       - name: Upload Coverage Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-report-php-${{ matrix.php-version }}
           path: coverage
