@@ -1,48 +1,28 @@
 name: Test
 
 on:
-  pull_request:
-    branches: [ main ]
-  push:
-    branches: [ main, 'feature/**', 'fix/**', 'hotfix/**' ]
+  workflow_run:
+    workflows: [Static Analysis]
+    types: [completed]
+    branches: [main]
 
 jobs:
   test:
     name: PHP ${{ matrix.php-version }}
     runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
     strategy:
       matrix:
         php-version: ['8.1', '8.2', '8.3', '8.4']
       fail-fast: false
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ matrix.php-version }}
-          extensions: mbstring, zip, pcov
-          ini-values: pcov.enabled=1
-          coverage: pcov
-
-      - name: Cache Composer
-        uses: actions/cache@v4
-        with:
-          path: ~/.composer/cache
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
-
-      - name: Install dependencies
-        run: composer install --no-progress --prefer-dist --no-suggest
-
-      - name: Run Unit Tests with Coverage
-        run: composer test:coverage
-
-      - name: Upload Coverage Artifact
-        uses: actions/upload-artifact@v4
+        php-version: ${{ matrix.php-version }}
+      - run: composer install --no-progress
+      - run: composer test:coverage
+      - uses: actions/upload-artifact@v4
         with:
           name: coverage-report-php-${{ matrix.php-version }}
           path: coverage
-          retention-days: 7
