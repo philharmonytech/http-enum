@@ -38,7 +38,7 @@ jobs:
         run: composer install --no-progress --prefer-dist --no-suggest
 
       - name: Run Unit Tests with Coverage
-        run: phpunit --coverage-html coverage --coverage-text --colors=always
+        run: composer test:coverage
 
       - name: Upload Coverage Artifact
         uses: actions/upload-artifact@v4
