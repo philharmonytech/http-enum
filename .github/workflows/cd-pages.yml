@@ -1,5 +1,4 @@
 name: Deploy Coverage to GitHub Pages
-
 on:
   workflow_run:
     workflows: [Test]
@@ -28,11 +27,8 @@ jobs:
           echo "Branch: ${{ github.event.workflow_run.head_branch }}"
           echo "Conclusion: ${{ github.event.workflow_run.conclusion }}"
 
-
-      - name: Deploy via GitHub App
+      - name: Checkout current repo
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GH_APP_TOKEN }}
 
       - name: Generate App token
         id: generate-token
@@ -84,6 +80,7 @@ jobs:
           git rm -rf .
           cp -r ../docs/* .
           echo "Coverage files copied to gh-pages repo."
+
 
       - name: Commit and push to gh-pages
         run: |
