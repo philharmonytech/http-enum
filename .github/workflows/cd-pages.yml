@@ -46,6 +46,7 @@ jobs:
         with:
           name: coverage-report-php-8.4
           path: docs
+          run-id: ${{ github.event.workflow_run.id }}
 
       - name: Verify downloaded files
         run: |
