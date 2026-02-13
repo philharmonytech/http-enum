@@ -9,23 +9,56 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
+    # Явные разрешения — обходят настройки организации
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+
     if: |
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.head_branch == 'main'
+
     steps:
-      - name: Checkout
+      - name: Checkout current repo (http-enum)
         uses: actions/checkout@v4
 
-      - name: Download coverage (PHP 8.4)
+      - name: Download coverage artifact (PHP 8.4)
         uses: actions/download-artifact@v4
         with:
           name: coverage-report-php-8.4
           path: docs
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: docs
-          publish_branch: gh-pages
-          commit_message: ${{ format('Update coverage report from {0}', github.sha) }}
+      - name: Clone gh-pages repository
+        run: |
+          git clone https://github.com/philharmonytech/gh-pages.git gh-pages-repo
+          cd gh-pages-repo
+
+      - name: Create gh-pages branch if not exists
+        run: |
+          cd gh-pages-repo
+          if ! git ls-remote --exit-code --heads origin gh-pages; then
+            echo "Creating gh-pages branch..."
+            git checkout --orphan gh-pages
+            git commit --allow-empty -m "Initialize gh-pages branch"
+            git push origin gh-pages
+          else
+            echo "gh-pages branch already exists."
+          fi
+
+      - name: Copy coverage files to gh-pages repo
+        run: |
+          cd gh-pages-repo
+          git rm -rf .
+          cp -r ../docs/* .
+          echo "Coverage files copied to gh-pages repo."
+
+      - name: Commit and push to gh-pages
+        run: |
+          cd gh-pages-repo
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Update coverage report from ${{ github.sha }}"
+          git push origin gh-pages
