@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
+      actions: read
       contents: write
       pages: write
       id-token: write
@@ -30,8 +31,8 @@ jobs:
       - name: Checkout current repo
         uses: actions/checkout@v4
 
-      - name: ⏳ Wait 2 minutes for artifact availability
-        run: sleep 120
+      - name: ⏳ Wait 5 minutes for artifact availability
+        run: sleep 300
 
       - name: Download coverage artifact (PHP 8.4)
         uses: actions/download-artifact@v4
@@ -53,7 +54,6 @@ jobs:
         run: |
           git clone https://github.com/philharmonytech/gh-pages.git gh-pages-repo
           cd gh-pages-repo
-
 
       - name: Create gh-pages branch if not exists
         run: |
