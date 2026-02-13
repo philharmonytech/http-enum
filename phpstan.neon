@@ -1,9 +1,9 @@
 parameters:
-    memoryLimit: 1G
-    bootstrapFiles:
-        - vendor/autoload.php
-    level: 9
-    paths:
-        - src
-        - tests
-    treatPhpDocTypesAsCertain: false
+  level: 9
+  paths:
+    - src
+  excludePaths:
+    - tests/*
+  bootstrapFiles:
+    - vendor/autoload.php
+  treatPhpDocTypesAsCertain: false

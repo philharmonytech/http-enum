@@ -40,7 +40,7 @@
   "scripts": {
     "test": "phpunit",
     "test:coverage": "phpunit --coverage-clover coverage.xml --coverage-html coverage --coverage-filter src",
-    "phpstan": "phpstan analyse",
+    "phpstan": "phpstan analyse --memory-limit=1G",
     "cs-check": "php-cs-fixer fix --dry-run --allow-risky=yes",
     "cs-fix": "php-cs-fixer fix --allow-risky=yes"
   },
