@@ -10,7 +10,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    # Явные разрешения — обходят настройки организации
     permissions:
       contents: write
       pages: write
@@ -21,8 +20,18 @@ jobs:
       github.event.workflow_run.head_branch == 'main'
 
     steps:
-      - name: Checkout current repo (http-enum)
+      - name: 🔍 Debug Show triggering workflow details
+        run: |
+          echo "Triggered by workflow run ID: ${{ github.event.workflow_run.id }}"
+          echo "Run URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}"
+          echo "Branch: ${{ github.event.workflow_run.head_branch }}"
+          echo "Conclusion: ${{ github.event.workflow_run.conclusion }}"
+
+      - name: Checkout current repo
         uses: actions/checkout@v4
+
+      - name: ⏳ Wait 2 minutes for artifact availability
+        run: sleep 120
 
       - name: Download coverage artifact (PHP 8.4)
         uses: actions/download-artifact@v4
@@ -30,10 +39,21 @@ jobs:
           name: coverage-report-php-8.4
           path: docs
 
+      - name: Verify downloaded files
+        run: |
+          if [ -z "$(ls -A docs)" ]; then
+            echo "ERROR: No files downloaded in 'docs' folder!"
+            exit 1
+          else
+            echo "Files in docs:"
+            ls -la docs
+          fi
+
       - name: Clone gh-pages repository
         run: |
           git clone https://github.com/philharmonytech/gh-pages.git gh-pages-repo
           cd gh-pages-repo
+
 
       - name: Create gh-pages branch if not exists
         run: |
