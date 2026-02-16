@@ -31,29 +31,20 @@ jobs:
       - name: Run tests with coverage
         run: composer test:coverage
 
-      - name: 🔍 Check coverage files before upload
+      - name: 🔍 Check coverage files
         run: |
-          echo "Checking coverage files for PHP ${{ matrix.php-version }}..."
-          if [ -d "coverage" ]; then
-            echo "✅ Coverage folder exists:"
-            ls -la coverage/
-            du -sh coverage/
-          
-            # Проверяем наличие ключевых файлов (например, index.html)
-            if [ -f "coverage/index.html" ]; then
-              echo "✅ index.html found — coverage report is valid"
-            else
-              echo "❌ ERROR: index.html not found in coverage/!"
-              exit 1
-            fi
+          if [ -f "coverage/index.html" ]; then
+            echo "✅ Coverage report generated"
           else
-            echo "❌ ERROR: coverage folder does not exist!"
+            echo "❌ Coverage report not found!"
             exit 1
           fi
 
-      - name: Upload coverage artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v4
         with:
-          name: coverage-report-php-${{ matrix.php-version }}
-          path: coverage
-          retention-days: 30
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage/clover.xml
+          flags: php-${{ matrix.php-version }}
+          name: coverage-php-${{ matrix.php-version }}
+          fail_ci_if_error: true
