@@ -41,6 +41,19 @@ enum Scheme: string
         };
     }
 
+    public function requiresHost(): bool
+    {
+        return match($this) {
+            self::HTTP,
+            self::HTTPS,
+            self::WS,
+            self::WSS,
+            self::FTP,
+            self::SFTP => true,
+            default => false,
+        };
+    }
+
     public function isSecure(): bool
     {
         return match($this) {
