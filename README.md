@@ -18,6 +18,7 @@ Type-safe HTTP enums for PHP: methods, status codes, and content types — desig
 - `HttpMethod` — standard HTTP request methods
 - `StatusCode` — HTTP status codes with semantic grouping
 - `ContentType` — common media types for responses and requests
+- `Scheme` — URI schemes with default port mapping (RFC 3986 compliant)
 
 Built for **clean, expressive, and safe code**, this lightweight library requires no dependencies beyond PHP 8.1+ and is ideal for frameworks, middleware, and reusable components.
 
@@ -77,6 +78,22 @@ if ($contentType->isTextBased()) {
 
 if ($contentType->isImage()) {
     // Handle image types
+}
+```
+
+### URI Schemes & Ports
+```php
+use Philharmony\Http\Enum\Scheme;
+
+$scheme = Scheme::tryFrom('https');
+
+echo $scheme->defaultPort(); // 443
+
+if ($scheme->isSecure()) {
+    // Logic for secure connection (SSL/TLS)
+}
+if ($scheme->requiresHost()) {
+    // Logic for requires host
 }
 ```
 
@@ -160,6 +177,17 @@ Represents media types as a backed enum (`string`) with parsing and detection ut
 - `binary()`
 
 > Example: `ContentType::fromHeader('application/json; charset=utf-8')` → `ContentType::JSON`
+
+### `Scheme`
+
+Represents URI schemes as a backed enum (string) with port mapping.
+
+| Method                | Description                                                                   |
+|-----------------------|-------------------------------------------------------------------------------|
+| `defaultPort(): ?int` | Returns standard port (e.g., `HTTP` → `80`, `HTTPS` → `443`, `LDAPS` → `636`) |
+| `isSecure(): bool`    | Returns `true` for secure protocols: `HTTPS`, `WSS`, `SFTP`, `LDAPS`, `SSH`   |
+ | `requiresHost(): bool`| Returns `true` for require host: `HTTP`, `HTTPS`, `WS`, `WSS`, `FTP`, `SFTP`  |
+
 
 ## 📄 License
 This package is open-source and licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
