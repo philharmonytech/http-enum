@@ -92,6 +92,9 @@ echo $scheme->defaultPort(); // 443
 if ($scheme->isSecure()) {
     // Logic for secure connection (SSL/TLS)
 }
+if ($scheme->requiresHost()) {
+    // Logic for requires host
+}
 ```
 
 ## 📚 Enum Methods
@@ -179,10 +182,11 @@ Represents media types as a backed enum (`string`) with parsing and detection ut
 
 Represents URI schemes as a backed enum (string) with port mapping.
 
-| Method | Description                                                           |
-|-------|-----------------------------------------------------------------------|
+| Method                | Description                                                                   |
+|-----------------------|-------------------------------------------------------------------------------|
 | `defaultPort(): ?int` | Returns standard port (e.g., `HTTP` → `80`, `HTTPS` → `443`, `LDAPS` → `636`) |
-| `isSecure(): bool` | Returns `true` for secure protocols: `HTTPS`, `WSS`, `SFTP`, `LDAPS`, `SSH`                                                    |
+| `isSecure(): bool`    | Returns `true` for secure protocols: `HTTPS`, `WSS`, `SFTP`, `LDAPS`, `SSH`   |
+ | `requiresHost(): bool`| Returns `true` for require host: `HTTP`, `HTTPS`, `WS`, `WSS`, `FTP`, `SFTP`  |
 
 
 ## 📄 License
