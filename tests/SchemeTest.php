@@ -59,7 +59,7 @@ class SchemeTest extends TestCase
         $this->assertNull(Scheme::tryFrom(''));
     }
 
-    #[DataProvider('schemePortProvider')]
+    #[DataProvider('schemePortDataProvider')]
     public function testDefaultPortReturnsCorrectValue(
         Scheme $scheme,
         int $expectedPort
@@ -70,7 +70,7 @@ class SchemeTest extends TestCase
     /**
      * @return array<string, array{scheme: Scheme, expectedPort:int}>
      */
-    public static function schemePortProvider(): array
+    public static function schemePortDataProvider(): array
     {
         return [
             'http is 80' => [
@@ -140,7 +140,68 @@ class SchemeTest extends TestCase
         ];
     }
 
-    #[DataProvider('secureSchemeProvider')]
+    #[DataProvider('requiresHostDataProvider')]
+    public function testRequiresHostCorrectBoolean(
+        Scheme $scheme,
+        bool $expectedRequiresHost
+    ): void {
+        $this->assertSame($expectedRequiresHost, $scheme->requiresHost());
+    }
+
+    /**
+     * @return array<string, array{scheme: Scheme, expectedRequiresHost:bool}>
+     */
+    public static function requiresHostDataProvider(): array
+    {
+        return [
+            'http is require host' => [
+                'scheme' => Scheme::HTTP,
+                'expectedRequiresHost' => true,
+            ],
+            'https is require host' => [
+                'scheme' => Scheme::HTTPS,
+                'expectedRequiresHost' => true,
+            ],
+            'ws is require host' => [
+                'scheme' => Scheme::WS,
+                'expectedRequiresHost' => true,
+            ],
+            'wss is require host' => [
+                'scheme' => Scheme::WSS,
+                'expectedRequiresHost' => true,
+            ],
+            'ftp is require host' => [
+                'scheme' => Scheme::FTP,
+                'expectedRequiresHost' => true,
+            ],
+            'sftp is require host' => [
+                'scheme' => Scheme::SFTP,
+                'expectedRequiresHost' => true,
+            ],
+            'ldap is not require host' => [
+                'scheme' => Scheme::LDAP,
+                'expectedRequiresHost' => false,
+            ],
+            'ldaps is not require host' => [
+                'scheme' => Scheme::LDAPS,
+                'expectedRequiresHost' => false,
+            ],
+            'imap is not require host' => [
+                'scheme' => Scheme::IMAP,
+                'expectedRequiresHost' => false,
+            ],
+            'smtp is not require host' => [
+                'scheme' => Scheme::SMTP,
+                'expectedRequiresHost' => false,
+            ],
+            'POP is not require host' => [
+                'scheme' => Scheme::POP,
+                'expectedRequiresHost' => false,
+            ],
+        ];
+    }
+
+    #[DataProvider('secureSchemeDataProvider')]
     public function testIsSecureReturnsCorrectBoolean(
         Scheme $scheme,
         bool $expectedSecure
@@ -151,7 +212,7 @@ class SchemeTest extends TestCase
     /**
      * @return array<string, array{scheme: Scheme, expectedSecure:bool}>
      */
-    public static function secureSchemeProvider(): array
+    public static function secureSchemeDataProvider(): array
     {
         return [
             'http is not secure' => [
