@@ -9,9 +9,9 @@
 [![Total Downloads](https://img.shields.io/packagist/dt/philharmony/http-enum)](https://packagist.org/packages/philharmony/http-enum)
 [![License](https://img.shields.io/packagist/l/philharmony/http-enum)](https://github.com/philharmonytech/http-enum/blob/main/LICENSE)
 
-Type-safe HTTP enums for PHP: methods, status codes, and content types — designed for modern applications and libraries.
+Type-safe HTTP enums for PHP: methods, status codes, content types and scheme — designed for modern applications and libraries.
 
-## 📦 Description
+## 📖 Description
 
 `philharmony/http-enum` provides a set of **strictly typed, PSR-compliant enums** for common HTTP concepts:
 
@@ -22,7 +22,7 @@ Type-safe HTTP enums for PHP: methods, status codes, and content types — desig
 
 Built for **clean, expressive, and safe code**, this lightweight library requires no dependencies beyond PHP 8.1+ and is ideal for frameworks, middleware, and reusable components.
 
-## 🛠 Installation
+## 📦 Installation
 
 Install via Composer:
 
@@ -30,78 +30,77 @@ Install via Composer:
 composer require philharmony/http-enum
 ```
 
-## 🧪 Usage
+## 🚀 Usage
+
 ### HTTP Methods
+
 ```php
 use Philharmony\Http\Enum\HttpMethod;
 
 $method = HttpMethod::POST;
 
-if ($method->isSafe()) {
-    // Handle safe methods (GET, HEAD, etc.)
-}
-
-if ($method->isIdempotent()) {
-    // Handle idempotent methods (GET, PUT, DELETE, etc.)
-}
+if ($method->isSafe()) { /* Handle GET, HEAD... */ }
+if ($method->isIdempotent()) { /* Handle PUT, DELETE... */ }
 ```
+
 ### Status Codes
+
 ```php
 use Philharmony\Http\Enum\StatusCode;
 
 $status = StatusCode::NOT_FOUND;
 
-if ($status->isClientError()) {
-    // 4xx — client-side error
-}
-
-if ($status->isServerError()) {
-    // 5xx — server-side error
-}
-
-if ($status->isSuccess()) {
-    // 2xx — success
-}
+if ($status->isInformational()) { /* 1xx */ }
+if ($status->isSuccess()) { /* 2xx */ }
+if ($status->isRedirection()) { /* 3xx */ }
+if ($status->isClientError()) { /* 4xx */ }
+if ($status->isServerError()) { /* 5xx */ }
+if ($status->isClientOrServerError()) { /* 4xx and 5xx */ }
+if ($status->phrase() === 'Not Found') { /* Semantic phrases */ }
 ```
 
 ### Content Types
+
 ```php
 use Philharmony\Http\Enum\ContentType;
 
-$contentType = ContentType::APPLICATION_JSON;
-
+$contentType = ContentType::JSON;
 header('Content-Type: ' . $contentType->value);
 
-if ($contentType->isTextBased()) {
-    // Handle text-like responses (JSON, HTML, etc.)
-}
+if ($contentType->isTextBased()) { /* Handle text-like responses (JSON, HTML, etc.) */ }
+if ($contentType->isJson()) { /* Handle json types */ }
+if ($contentType->isImage()) { /* Handle image types */ }
+if ($contentType->isAudio()) { /* Handle audio types */ }
+if ($contentType->isVideo()) { /* Handle video types */ }
+if ($contentType->isMedia()) { /* Handle audio, video and image types */ }
+if ($contentType->isFont()) { /* Handle font types */ }
+if ($contentType->isForm()) { /* Handle for form types */ }
+if ($contentType->isBinary()) { /* Handle for binary types */ }
 
-if ($contentType->isImage()) {
-    // Handle image types
-}
+$type = ContentType::fromHeader('application/json; charset=utf-8');
+if ($type?->isJson()) { /* Handle JSON */ }
+
+$type = ContentType::fromExtension('txt');
+header('Content-Type: ' . $type->value);
 ```
 
 ### URI Schemes & Ports
+
 ```php
 use Philharmony\Http\Enum\Scheme;
 
-$scheme = Scheme::tryFrom('https');
-
+$scheme = Scheme::HTTPS;
 echo $scheme->defaultPort(); // 443
 
-if ($scheme->isSecure()) {
-    // Logic for secure connection (SSL/TLS)
-}
-if ($scheme->requiresHost()) {
-    // Logic for requires host
-}
+if ($scheme->isSecure()) { /* Logic for secure connection (SSL/TLS) */ }
+if ($scheme->requiresHost()) { /* Logic for requires host */ }
 ```
 
-## 📚 Enum Methods
+## ✨ Enum Methods
 
 Each enum provides a set of utility methods for semantic checks, parsing, and grouping — enabling expressive, safe, and framework-agnostic HTTP handling.
 
-### `HttpMethod`
+### 🏷️ `HttpMethod`
 
 Represents standard HTTP request methods as a backed enum (`string`).
 
@@ -117,7 +116,7 @@ Represents standard HTTP request methods as a backed enum (`string`).
 
 ---
 
-### `StatusCode`
+### 🔢 `StatusCode`
 
 Represents HTTP status codes as a backed enum (`int`) with semantic grouping and standard reason phrases.
 
@@ -145,7 +144,7 @@ Represents HTTP status codes as a backed enum (`int`) with semantic grouping and
 
 ---
 
-### `ContentType`
+### 📝 `ContentType`
 
 Represents media types as a backed enum (`string`) with parsing and detection utilities.
 
@@ -178,7 +177,7 @@ Represents media types as a backed enum (`string`) with parsing and detection ut
 
 > Example: `ContentType::fromHeader('application/json; charset=utf-8')` → `ContentType::JSON`
 
-### `Scheme`
+### 🌐 `Scheme`
 
 Represents URI schemes as a backed enum (string) with port mapping.
 
@@ -189,5 +188,37 @@ Represents URI schemes as a backed enum (string) with port mapping.
  | `requiresHost(): bool`| Returns `true` for require host: `HTTP`, `HTTPS`, `WS`, `WSS`, `FTP`, `SFTP`  |
 
 
+## 🧪 Testing
+
+The package is strictly tested with PHPUnit 10 to ensure full compliance with HTTP standards and RFCs.
+
+### Run Tests
+
+```bash
+composer test
+```
+
+### Code Coverage
+
+```bash
+composer test:coverage
+```
+
+## 🏗️ Static Analysis & Code Style
+
+Verified with PHPStan Level 9 to ensure total type safety and prevent runtime errors.
+
+```bash
+composer phpstan
+```
+
+Check and fix code style (PSR-12):
+
+```bash
+composer cs-check
+composer cs-fix
+```
+
 ## 📄 License
+
 This package is open-source and licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
