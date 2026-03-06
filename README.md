@@ -30,6 +30,10 @@ Install via Composer:
 composer require philharmony/http-enum
 ```
 
+## ⚙️ Requirements
+
+- PHP 8.1 or higher
+
 ## 🚀 Usage
 
 ### HTTP Methods
@@ -41,6 +45,11 @@ $method = HttpMethod::POST;
 
 if ($method->isSafe()) { /* Handle GET, HEAD... */ }
 if ($method->isIdempotent()) { /* Handle PUT, DELETE... */ }
+if ($method->isCacheable()) { /* Handle GET, HEAD */ }
+if ($method->isReadOnly()) { /* Handle GET, HEAD, OPTION, TRACE */ }
+if ($method->isWriteOnly()) { /* Handle POST, PUT, PATCH, DELETE, CONNECT */ }
+if ($method->usuallyHasBody()) { /* POST, PUT, PATCH -> true, other false */ }
+if ($method->allowsBody()) { /* POST, PUT, PATCH, DELETE -> true, other false */ }
 ```
 
 ### Status Codes
@@ -55,8 +64,10 @@ if ($status->isSuccess()) { /* 2xx */ }
 if ($status->isRedirection()) { /* 3xx */ }
 if ($status->isClientError()) { /* 4xx */ }
 if ($status->isServerError()) { /* 5xx */ }
-if ($status->isClientOrServerError()) { /* 4xx and 5xx */ }
+if ($status->isError()) { /* 4xx and 5xx */ }
 if ($status->phrase() === 'Not Found') { /* Semantic phrases */ }
+
+echo StatusCode::NOT_FOUND->toStatusLine(); // 404 Not Found
 ```
 
 ### Content Types
@@ -69,6 +80,7 @@ header('Content-Type: ' . $contentType->value);
 
 if ($contentType->isTextBased()) { /* Handle text-like responses (JSON, HTML, etc.) */ }
 if ($contentType->isJson()) { /* Handle json types */ }
+if ($contentType->isXml()) { /* Handle xml types */ }
 if ($contentType->isImage()) { /* Handle image types */ }
 if ($contentType->isAudio()) { /* Handle audio types */ }
 if ($contentType->isVideo()) { /* Handle video types */ }
@@ -76,12 +88,21 @@ if ($contentType->isMedia()) { /* Handle audio, video and image types */ }
 if ($contentType->isFont()) { /* Handle font types */ }
 if ($contentType->isForm()) { /* Handle for form types */ }
 if ($contentType->isBinary()) { /* Handle for binary types */ }
+if ($contentType->isScript()) { /* Handle for script type */ }
+if ($contentType->isArchive()) { /* Handle for archive type */ }
 
 $type = ContentType::fromHeader('application/json; charset=utf-8');
 if ($type?->isJson()) { /* Handle JSON */ }
 
 $type = ContentType::fromExtension('txt');
 header('Content-Type: ' . $type->value);
+
+echo ContentType::JSON->baseType(); // 'json'
+echo ContentType::MP4->category(); // 'video'
+echo ContentType::JSON->is('application/json'); // true
+echo ContentType::JSON->is('APPLICATION/JSON'); // true
+echo ContentType::JSON->matches('application/*');  // true
+echo ContentType::PNG->matches('image/*');        // true
 ```
 
 ### URI Schemes & Ports
@@ -94,6 +115,10 @@ echo $scheme->defaultPort(); // 443
 
 if ($scheme->isSecure()) { /* Logic for secure connection (SSL/TLS) */ }
 if ($scheme->requiresHost()) { /* Logic for requires host */ }
+if ($scheme->isHttp()) { /* Handle HTTP, HTTPS */ }
+if ($scheme->isWebSocket()) { /* Handle WS, WSS */ }
+if ($scheme->isMail()) { /* Handle IMAP, POP, SMTP */ }
+if ($scheme->isLdap()) { /* Handle LDAP, LDAPS */ }
 ```
 
 ## ✨ Enum Methods
@@ -104,15 +129,23 @@ Each enum provides a set of utility methods for semantic checks, parsing, and gr
 
 Represents standard HTTP request methods as a backed enum (`string`).
 
-| Method | Description |
-|-------|-------------|
-| `isSafe(): bool` | Returns `true` for safe methods: `GET`, `HEAD`, `OPTIONS`, `TRACE` |
-| `isIdempotent(): bool` | Returns `true` for idempotent methods: `GET`, `HEAD`, `PUT`, `DELETE`, `OPTIONS`, `TRACE`, `CONNECT` |
-| `isValid(string $method): bool` | Checks if the given string is a valid HTTP method (case-sensitive) |
-| `from(string $value)` | Built-in (PHP 8.1+) — creates an instance from a valid method string |
-| `tryFrom(string $value)` | Built-in (PHP 8.1+) — returns `null` if invalid |
+| Method                          | Description                                                                                          |
+|---------------------------------|------------------------------------------------------------------------------------------------------|
+| `isSafe(): bool`                | Returns `true` for safe methods: `GET`, `HEAD`, `OPTIONS`, `TRACE`                                   |
+| `isIdempotent(): bool`          | Returns `true` for idempotent methods: `GET`, `HEAD`, `PUT`, `DELETE`, `OPTIONS`, `TRACE`, `CONNECT` |
+| `isCacheable(): bool`           | Returns `true` for cacheable methods: `GET`, `HEAD`                                                  |
+| `isReadOnly(): bool`            | Returns `true` for read only methods: `GET`, `HEAD`, `OPTIONS`, `TRACE`                              |
+| `isWriteOnly(): bool`           | Returns `true` for write only methods: `POST`, `PUT`, `PATCH`, `DELETE`, `CONNECT`                   |
+| `usuallyHasBody(): bool`        | Returns `true` for write only methods: `POST`, `PUT`, `PATCH`                                        |
+| `allowsBody(): bool`            | Returns `true` for write only methods: `POST`, `PUT`, `PATCH`, `DELETE`                              |
+| `isValid(string $method): bool` | Checks if the given string is a valid HTTP method (case-sensitive)                                   |
+| `fromString(string $value)`     | Creates an instance from a valid method string - used strtoupper for value and from()                |
+| `tryFromString(string $value)`  | Creates an instance from a valid method string - used strtoupper for value and tryFrom()             |
+| `from(string $value)`           | Built-in (PHP 8.1+) — creates an instance from a valid method string                                 |
+| `tryFrom(string $value)`        | Built-in (PHP 8.1+) — returns `null` if invalid                                                      |
 
 > Example: `HttpMethod::isValid('POST')` → `true`
+> Example: `HttpMethod::tryFromString('post')` → `HttpMethod::POST`
 
 ---
 
@@ -120,17 +153,18 @@ Represents standard HTTP request methods as a backed enum (`string`).
 
 Represents HTTP status codes as a backed enum (`int`) with semantic grouping and standard reason phrases.
 
-| Method | Description |
-|-------|-------------|
-| `isInformational(): bool` | `1xx` (100–199) |
-| `isSuccess(): bool` | `2xx` (200–299) |
-| `isRedirection(): bool` | `3xx` (300–399) |
-| `isClientError(): bool` | `4xx` (400–499) |
-| `isServerError(): bool` | `5xx` (500–599) |
-| `isClientOrServerError(): bool` | `4xx` or `5xx` — indicates an error condition |
-| `phrase(): string` | Returns the standard reason phrase (e.g., `OK` → `"OK"`, `I_M_A_TEAPOT` → `"I'm a teapot"`) |
-| `from(int $code)` | Built-in — creates from status code |
-| `tryFrom(int $code)` | Built-in — returns `null` if invalid |
+| Method                      | Description                                                                                 |
+|-----------------------------|---------------------------------------------------------------------------------------------|
+| `isInformational(): bool`   | `1xx` (100–199)                                                                             |
+| `isSuccess(): bool`         | `2xx` (200–299)                                                                             |
+| `isRedirection(): bool`     | `3xx` (300–399)                                                                             |
+| `isClientError(): bool`     | `4xx` (400–499)                                                                             |
+| `isServerError(): bool`     | `5xx` (500–599)                                                                             |
+| `isError(): bool`           | `4xx` or `5xx` — indicates an error condition                                               |
+| `phrase(): string`          | Returns the standard reason phrase (e.g., `OK` → `"OK"`, `I_M_A_TEAPOT` → `"I'm a teapot"`) |
+| `toStatusLine(): string`    | Returns full status line fragment like `404 Not Found`                                      |
+| `from(int $code)`           | Built-in — creates from status code                                                         |
+| `tryFrom(int $code)`        | Built-in — returns `null` if invalid                                                        |
 
 #### Static Group Methods (return `StatusCode[]`):
 - `informational()` — all `1xx`
@@ -138,7 +172,7 @@ Represents HTTP status codes as a backed enum (`int`) with semantic grouping and
 - `redirection()` — all `3xx`
 - `clientError()` — all `4xx`
 - `serverError()` — all `5xx`
-- `clientOrServerError()` — all `4xx` and `5xx`
+- `error()` — all `4xx` and `5xx`
 
 > Example: `StatusCode::NOT_FOUND->isClientError()` → `true`
 
@@ -148,25 +182,33 @@ Represents HTTP status codes as a backed enum (`int`) with semantic grouping and
 
 Represents media types as a backed enum (`string`) with parsing and detection utilities.
 
-| Method | Description |
-|-------|-------------|
-| `isTextBased(): bool` | `text/*`, `application/json`, `application/xml`, `application/javascript`, etc. |
-| `isJson(): bool` | `application/json`, `application/hal+json`, `application/problem+json`, etc. |
-| `isImage(): bool` | `image/*` |
-| `isAudio(): bool` | `audio/*` |
-| `isVideo(): bool` | `video/*` |
-| `isMedia(): bool` | `image/*`, `audio/*`, `video/*` |
-| `isFont(): bool` | `font/woff`, `font/woff2`, `font/ttf`, `font/otf` |
-| `isForm(): bool` | `application/x-www-form-urlencoded`, `multipart/form-data` |
-| `isBinary(): bool` | Includes media, fonts, PDF, ZIP, Protobuf, etc. |
-| `fromHeader(string $header): ?self` | Parses from `Content-Type` header (ignores parameters like `; charset=utf-8`) |
-| `fromExtension(string $extension): ?self` | Maps file extension (e.g., `.json`, `.png`) to content type |
-| `from(string $value)` | Built-in — creates from MIME type |
-| `tryFrom(string $value)` | Built-in — returns `null` if invalid |
+| Method                                    | Description                                                                                     |
+|-------------------------------------------|-------------------------------------------------------------------------------------------------|
+| `isTextBased(): bool`                     | `text/*`, `application/json`, `application/xml`, `application/javascript`, etc.                 |
+| `isJson(): bool`                          | `application/json`, `application/hal+json`, `application/problem+json`, etc.                    |
+| `isXml(): bool`                           | `application/xml`, `application/atom+xml`, `application/rss+xml`, `application/xhtml+xml`, etc. |
+| `isImage(): bool`                         | `image/*`                                                                                       |
+| `isAudio(): bool`                         | `audio/*`                                                                                       |
+| `isVideo(): bool`                         | `video/*`                                                                                       |
+| `isMedia(): bool`                         | `image/*`, `audio/*`, `video/*`                                                                 |
+| `isFont(): bool`                          | `font/woff`, `font/woff2`, `font/ttf`, `font/otf`                                               |
+| `isForm(): bool`                          | `application/x-www-form-urlencoded`, `multipart/form-data`                                      |
+| `isBinary(): bool`                        | Includes media, fonts, PDF, ZIP, Protobuf, etc.                                                 |
+| `isScript(): bool`                        | `application/javascript`                                                                        |
+| `isArchive(): bool`                       | `application/zip`                                                                               |
+| `baseType(): string`                      | Returns base subtype (e.g. `application/json` → `json`)                                         |
+| `category(): string`                      | Returns MIME category (e.g. `json`, `image`, `video`, `audio`, `text`)                          |
+| `is(): bool`                              | Case-insensitive exact match for MIME type                                                      |
+| `matches(): bool`                         | Pattern match like `image/*`, `application/*`                                                   |
+| `fromHeader(string $header): ?self`       | Parses from `Content-Type` header (ignores parameters like `; charset=utf-8`)                   |
+| `fromExtension(string $extension): ?self` | Maps file extension (e.g., `.json`, `.png`) to content type                                     |
+| `from(string $value)`                     | Built-in — creates from MIME type                                                               |
+| `tryFrom(string $value)`                  | Built-in — returns `null` if invalid                                                            |
 
 #### Static Group Methods (return `ContentType[]`):
 - `textBased()`, 
 - `json()`, 
+- `xml()`,
 - `image()`, 
 - `audio()`, 
 - `video()`, 
@@ -181,11 +223,15 @@ Represents media types as a backed enum (`string`) with parsing and detection ut
 
 Represents URI schemes as a backed enum (string) with port mapping.
 
-| Method                | Description                                                                   |
-|-----------------------|-------------------------------------------------------------------------------|
-| `defaultPort(): ?int` | Returns standard port (e.g., `HTTP` → `80`, `HTTPS` → `443`, `LDAPS` → `636`) |
-| `isSecure(): bool`    | Returns `true` for secure protocols: `HTTPS`, `WSS`, `SFTP`, `LDAPS`, `SSH`   |
- | `requiresHost(): bool`| Returns `true` for require host: `HTTP`, `HTTPS`, `WS`, `WSS`, `FTP`, `SFTP`  |
+| Method                 | Description                                                                                 |
+|------------------------|---------------------------------------------------------------------------------------------|
+| `defaultPort(): ?int`  | Returns standard port (e.g., `HTTP` → `80`, `HTTPS` → `443`, `LDAPS` → `636`)               |
+| `isSecure(): bool`     | Returns `true` for secure protocols: `HTTPS`, `WSS`, `SFTP`, `LDAPS`, `SSH`                 |
+ | `requiresHost(): bool` | Returns `true` for schemes that require a host: `HTTP`, `HTTPS`, `WS`, `WSS`, `FTP`, `SFTP` |
+| `isHttp(): bool`       | Returns `true` for `HTTP`, `HTTPS`                                                          |
+| `isWebSocket(): bool`  | Returns `true` for `WS`, `WSS`                                                              |
+| `isMail(): bool`       | Returns `true` for `SMTP`, `IMAP`, `POP`                                                    |
+| `isLdap(): bool`       | Returns `true` for `LDAP`, `LDAPS`                                                          |
 
 
 ## 🧪 Testing
