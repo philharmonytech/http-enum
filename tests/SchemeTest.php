@@ -13,22 +13,16 @@ class SchemeTest extends TestCase
 {
     public function testFromReturnsCorrectCase(): void
     {
-        $this->assertSame(Scheme::HTTP, Scheme::from('http'));
-        $this->assertSame(Scheme::HTTPS, Scheme::from('https'));
-        $this->assertSame(Scheme::WS, Scheme::from('ws'));
-        $this->assertSame(Scheme::WSS, Scheme::from('wss'));
-        $this->assertSame(Scheme::FTP, Scheme::from('ftp'));
-        $this->assertSame(Scheme::SFTP, Scheme::from('sftp'));
-        $this->assertSame(Scheme::SSH, Scheme::from('ssh'));
-        $this->assertSame(Scheme::TELNET, Scheme::from('telnet'));
-        $this->assertSame(Scheme::SMTP, Scheme::from('smtp'));
-        $this->assertSame(Scheme::IMAP, Scheme::from('imap'));
-        $this->assertSame(Scheme::POP, Scheme::from('pop'));
-        $this->assertSame(Scheme::LDAP, Scheme::from('ldap'));
-        $this->assertSame(Scheme::LDAPS, Scheme::from('ldaps'));
-        $this->assertSame(Scheme::GOPHER, Scheme::from('gopher'));
-        $this->assertSame(Scheme::NNTP, Scheme::from('nntp'));
-        $this->assertSame(Scheme::NEWS, Scheme::from('news'));
+        foreach (Scheme::cases() as $case) {
+            $this->assertSame($case, Scheme::from($case->value));
+        }
+    }
+
+    public function testTryFromReturnsCorrectCase(): void
+    {
+        foreach (Scheme::cases() as $case) {
+            $this->assertSame($case, Scheme::tryFrom($case->value));
+        }
     }
 
     public function testTryFromReturnsNullForInvalidValues(): void
@@ -59,12 +53,25 @@ class SchemeTest extends TestCase
         $this->assertNull(Scheme::tryFrom(''));
     }
 
+    public function testTryFromStringIsCaseInsensitive(): void
+    {
+        $this->assertSame(Scheme::HTTP, Scheme::tryFromString('HTTP'));
+        $this->assertSame(Scheme::SMTP, Scheme::tryFromString('SMTP'));
+    }
+
+    public function testFromStringIsCaseInsensitive(): void
+    {
+        $this->assertSame(Scheme::HTTPS, Scheme::fromString('HTTPS'));
+        $this->assertSame(Scheme::IMAP, Scheme::fromString('IMAP'));
+    }
+
     #[DataProvider('schemePortDataProvider')]
-    public function testDefaultPortReturnsCorrectValue(
+    public function testDefaultPort(
         Scheme $scheme,
         int $expectedPort
     ): void {
         $this->assertSame($expectedPort, $scheme->defaultPort());
+        $this->assertTrue($scheme->isDefaultPort($expectedPort));
     }
 
     /**
@@ -113,7 +120,7 @@ class SchemeTest extends TestCase
                 'scheme' => Scheme::GOPHER,
                 'expectedPort' => 70,
             ],
-            'gopher is 110' => [
+            'pop is 110' => [
                 'scheme' => Scheme::POP,
                 'expectedPort' => 110,
             ],
@@ -250,4 +257,39 @@ class SchemeTest extends TestCase
         ];
     }
 
+    public function testIsHttp(): void
+    {
+        foreach (Scheme::cases() as $type) {
+            $expected = in_array($type, [Scheme::HTTPS, Scheme::HTTP,], true);
+
+            $this->assertSame($expected, $type->isHttp());
+        }
+    }
+
+    public function testIsWebSocket(): void
+    {
+        foreach (Scheme::cases() as $type) {
+            $expected = in_array($type, [Scheme::WS, Scheme::WSS,], true);
+
+            $this->assertSame($expected, $type->isWebSocket());
+        }
+    }
+
+    public function testIsMail(): void
+    {
+        foreach (Scheme::cases() as $type) {
+            $expected = in_array($type, [Scheme::SMTP, Scheme::IMAP, Scheme::POP], true);
+
+            $this->assertSame($expected, $type->isMail());
+        }
+    }
+
+    public function testIsLdap(): void
+    {
+        foreach (Scheme::cases() as $type) {
+            $expected = in_array($type, [Scheme::LDAP, Scheme::LDAPS,], true);
+
+            $this->assertSame($expected, $type->isLdap());
+        }
+    }
 }
