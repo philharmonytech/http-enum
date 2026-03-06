@@ -9,7 +9,7 @@
 [![Total Downloads](https://img.shields.io/packagist/dt/philharmony/http-enum)](https://packagist.org/packages/philharmony/http-enum)
 [![License](https://img.shields.io/packagist/l/philharmony/http-enum)](https://github.com/philharmonytech/http-enum/blob/main/LICENSE)
 
-Type-safe HTTP enums for PHP: methods, status codes, content types and scheme — designed for modern applications and libraries.
+Type-safe HTTP enums for PHP: methods, status codes, headers, content types, schemes and protocol utilities — designed for modern applications and libraries.
 
 ## 📖 Description
 
@@ -23,8 +23,22 @@ Type-safe HTTP enums for PHP: methods, status codes, content types and scheme �
 - `AuthScheme` — HTTP authentication schemes (Basic, Bearer, Digest, OAuth, etc.)
 - `HttpVersion` — HTTP protocol versions with parsing utilities
 - `CacheDirective` — Cache-Control directives for HTTP caching behavior
+- `ContentEncoding` — HTTP compression algorithms (gzip, br, deflate, etc.)
 
-Built for **clean, expressive, and safe code**, this lightweight library requires no dependencies beyond PHP 8.1+ and is ideal for frameworks, middleware, and reusable components.
+Built for **clean, expressive, and safe code**, this lightweight library requires **PHP 8.1+** and has **zero runtime dependencies**.  
+It is ideal for **frameworks, middleware, SDKs, and reusable components**.
+
+### 📚 Included Enums
+
+- `HttpMethod`
+- `StatusCode`
+- `ContentType`
+- `Scheme`
+- `HttpHeader`
+- `AuthScheme`
+- `HttpVersion`
+- `CacheDirective`
+- `ContentEncoding`
 
 ## 📦 Installation
 
@@ -50,7 +64,7 @@ $method = HttpMethod::POST;
 if ($method->isSafe()) { /* Handle GET, HEAD... */ }
 if ($method->isIdempotent()) { /* Handle PUT, DELETE... */ }
 if ($method->isCacheable()) { /* Handle GET, HEAD */ }
-if ($method->isReadOnly()) { /* Handle GET, HEAD, OPTION, TRACE */ }
+if ($method->isReadOnly()) { /* Handle GET, HEAD, OPTIONS, TRACE */ }
 if ($method->isWriteOnly()) { /* Handle POST, PUT, PATCH, DELETE, CONNECT */ }
 if ($method->usuallyHasBody()) { /* POST, PUT, PATCH -> true, other false */ }
 if ($method->allowsBody()) { /* POST, PUT, PATCH, DELETE -> true, other false */ }
@@ -195,6 +209,18 @@ echo $directive->value; // no-cache
 $directive = CacheDirective::tryFromString('public');
 ```
 
+### Content Encoding
+
+```php
+use Philharmony\Http\Enum\ContentEncoding;
+
+$encoding = ContentEncoding::fromString('gzip');
+
+if ($encoding->isCompressed()) { /* Handle compressed response */ }
+
+$encoding = ContentEncoding::tryFromString('br');
+```
+
 ## ✨ Enum Methods
 
 Each enum provides a set of utility methods for semantic checks, parsing, and grouping — enabling expressive, safe, and framework-agnostic HTTP handling.
@@ -210,7 +236,7 @@ Represents standard HTTP request methods as a backed enum (`string`).
 | `isCacheable(): bool`           | Returns `true` for cacheable methods: `GET`, `HEAD`                                                  |
 | `isReadOnly(): bool`            | Returns `true` for read only methods: `GET`, `HEAD`, `OPTIONS`, `TRACE`                              |
 | `isWriteOnly(): bool`           | Returns `true` for write only methods: `POST`, `PUT`, `PATCH`, `DELETE`, `CONNECT`                   |
-| `usuallyHasBody(): bool`        | Returns `true` for write only methods: `POST`, `PUT`, `PATCH`                                        |
+| `usuallyHasBody(): bool`        | Returns true for methods that typically include a request body: `POST`, `PUT`, `PATCH`               |
 | `allowsBody(): bool`            | Returns `true` for write only methods: `POST`, `PUT`, `PATCH`, `DELETE`                              |
 | `isValid(string $method): bool` | Checks if the given string is a valid HTTP method (case-sensitive)                                   |
 | `fromString(string $value)`     | Creates an instance from a valid method string - used strtoupper for value and from()                |
@@ -301,7 +327,7 @@ Represents URI schemes as a backed enum (string) with port mapping.
 |------------------------|---------------------------------------------------------------------------------------------|
 | `defaultPort(): ?int`  | Returns standard port (e.g., `HTTP` → `80`, `HTTPS` → `443`, `LDAPS` → `636`)               |
 | `isSecure(): bool`     | Returns `true` for secure protocols: `HTTPS`, `WSS`, `SFTP`, `LDAPS`, `SSH`                 |
- | `requiresHost(): bool` | Returns `true` for schemes that require a host: `HTTP`, `HTTPS`, `WS`, `WSS`, `FTP`, `SFTP` |
+| `requiresHost(): bool` | Returns `true` for schemes that require a host: `HTTP`, `HTTPS`, `WS`, `WSS`, `FTP`, `SFTP` |
 | `isHttp(): bool`       | Returns `true` for `HTTP`, `HTTPS`                                                          |
 | `isWebSocket(): bool`  | Returns `true` for `WS`, `WSS`                                                              |
 | `isMail(): bool`       | Returns `true` for `SMTP`, `IMAP`, `POP`                                                    |
@@ -377,6 +403,19 @@ Represents `Cache-Control` directives used to control HTTP caching behavior.
 | `tryFrom(string $value)`             | Built-in — returns `null` if invalid                                |
 
 > Example: `CacheDirective::fromString('no-cache')` → `CacheDirective::NO_CACHE`
+
+### 📦 `ContentEncoding`
+
+Represents compression algorithms used in `Content-Encoding` and `Accept-Encoding` headers.
+
+| Method                            | Description                                                        |
+|-----------------------------------|--------------------------------------------------------------------|
+| `isCompressed(): bool`            | Returns `true` for compression algorithms (all except `identity`)  |
+| `fromString(string $encoding)`    | Creates enum from encoding string                                  |
+| `tryFromString(string $encoding)` | Safe version returning `null` if invalid                           |
+| `from(string $value)`             | Built-in — creates enum from valid string                          |
+| `tryFrom(string $value)`          | Built-in — returns `null` if invalid                               |
+
 
 ## 🧪 Testing
 
