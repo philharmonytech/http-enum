@@ -21,6 +21,7 @@ Type-safe HTTP enums for PHP: methods, status codes, content types and scheme �
 - `Scheme` — URI schemes with default port mapping (RFC 3986 compliant)
 - `HttpHeader` — common HTTP headers with semantic grouping and utilities
 - `AuthScheme` — HTTP authentication schemes (Basic, Bearer, Digest, OAuth, etc.)
+- `HttpVersion` — HTTP protocol versions with parsing utilities
 
 Built for **clean, expressive, and safe code**, this lightweight library requires no dependencies beyond PHP 8.1+ and is ideal for frameworks, middleware, and reusable components.
 
@@ -146,7 +147,7 @@ echo $header->value; // Content-Type
 $header = HttpHeader::tryFromString('x-forwarded-for');
 ```
 
-### 🔐 Authentication Schemes
+### Authentication Schemes
 
 ```php
 use Philharmony\Http\Enum\AuthScheme;
@@ -158,6 +159,22 @@ if ($scheme?->isPasswordBased()) { /* Handle Basic or Digest authentication */ }
 if ($scheme?->isChallengeBased()) { /* Handle challenge-response auth */ }
 
 $scheme = AuthScheme::fromString('basic'); // AuthScheme::BASIC
+```
+
+### HTTP Versions
+
+```php
+use Philharmony\Http\Enum\HttpVersion;
+
+$version = HttpVersion::HTTP_1_1;
+
+echo $version->toProtocolString(); // HTTP/1.1
+
+$version = HttpVersion::fromProtocol('HTTP/2');
+
+if ($version === HttpVersion::HTTP_2) { /* HTTP/2 logic */ }
+
+$version = HttpVersion::tryFromString('1.1');
 ```
 
 ## ✨ Enum Methods
@@ -258,7 +275,7 @@ Represents media types as a backed enum (`string`) with parsing and detection ut
 
 > Example: `ContentType::fromHeader('application/json; charset=utf-8')` → `ContentType::JSON`
 
-### 🌐 `Scheme`
+### 🌍 `Scheme`
 
 Represents URI schemes as a backed enum (string) with port mapping.
 
@@ -312,6 +329,20 @@ Represents HTTP authentication schemes used in the `Authorization` and `WWW-Auth
 > Example: `AuthScheme::fromHeader('Bearer token123')` → `AuthScheme::BEARER`
 > Example: `AuthScheme::fromString('basic')` → `AuthScheme::BASIC`
 
+### 🌐 `HttpVersion`
+
+Represents HTTP protocol versions.
+
+| Method                             | Description                                                     |
+|------------------------------------|-----------------------------------------------------------------|
+| `toProtocolString(): string`       | Returns protocol string like `HTTP/1.1`, `HTTP/2`               |
+| `fromProtocol(string $protocol)`   | Parses version from protocol string (`HTTP/1.1`, `HTTP/2`)     |
+| `fromString(string $version)`      | Creates enum from version string (`1.1`, `2`, `3`)              |
+| `tryFromString(string $version)`   | Safe version returning `null` if invalid                        |
+| `from(string $value)`              | Built-in — creates enum from version string                     |
+| `tryFrom(string $value)`           | Built-in — returns `null` if invalid                            |
+
+> Example: `HttpVersion::fromProtocol('HTTP/1.1')` → `HttpVersion::HTTP_1_1`
 
 ## 🧪 Testing
 
