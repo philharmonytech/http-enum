@@ -33,79 +33,49 @@ class StatusCodeTest extends TestCase
 
     public function testIsInformationalReturnsTrueForInformationalTypes(): void
     {
-        foreach (StatusCode::informational() as $type) {
-            $this->assertTrue($type->isInformational());
-        }
-
-        foreach (StatusCode::cases() as $case) {
-            if (!\in_array($case, StatusCode::informational(), true)) {
-                $this->assertFalse($case->isInformational());
-            }
+        foreach (StatusCode::cases() as $statusCode) {
+            $expected = \in_array($statusCode, StatusCode::informational(), true);
+            $this->assertSame($expected, $statusCode->isInformational());
         }
     }
 
     public function testIsSuccessReturnsTrueForSuccessTypes(): void
     {
-        foreach (StatusCode::success() as $type) {
-            $this->assertTrue($type->isSuccess());
-        }
-
-        foreach (StatusCode::cases() as $case) {
-            if (!\in_array($case, StatusCode::success(), true)) {
-                $this->assertFalse($case->isSuccess());
-            }
+        foreach (StatusCode::cases() as $statusCode) {
+            $expected = \in_array($statusCode, StatusCode::success(), true);
+            $this->assertSame($expected, $statusCode->isSuccess());
         }
     }
 
     public function testIsRedirectionReturnsTrueForRedirectionTypes(): void
     {
-        foreach (StatusCode::redirection() as $type) {
-            $this->assertTrue($type->isRedirection());
-        }
-
-        foreach (StatusCode::cases() as $case) {
-            if (!\in_array($case, StatusCode::redirection(), true)) {
-                $this->assertFalse($case->isRedirection());
-            }
+        foreach (StatusCode::cases() as $statusCode) {
+            $expected = \in_array($statusCode, StatusCode::redirection(), true);
+            $this->assertSame($expected, $statusCode->isRedirection());
         }
     }
 
     public function testIsClientErrorReturnsTrueForClientErrorTypes(): void
     {
-        foreach (StatusCode::clientError() as $type) {
-            $this->assertTrue($type->isClientError());
-        }
-
-        foreach (StatusCode::cases() as $case) {
-            if (!\in_array($case, StatusCode::clientError(), true)) {
-                $this->assertFalse($case->isClientError());
-            }
+        foreach (StatusCode::cases() as $statusCode) {
+            $expected = \in_array($statusCode, StatusCode::clientError(), true);
+            $this->assertSame($expected, $statusCode->isClientError());
         }
     }
 
     public function testIsServerErrorReturnsTrueForServerErrorTypes(): void
     {
-        foreach (StatusCode::serverError() as $type) {
-            $this->assertTrue($type->isServerError());
-        }
-
-        foreach (StatusCode::cases() as $case) {
-            if (!\in_array($case, StatusCode::serverError(), true)) {
-                $this->assertFalse($case->isServerError());
-            }
+        foreach (StatusCode::cases() as $statusCode) {
+            $expected = \in_array($statusCode, StatusCode::serverError(), true);
+            $this->assertSame($expected, $statusCode->isServerError());
         }
     }
 
-    public function testIsClientOrServerErrorReturnsTrueForClientOrServerErrorTypes(): void
+    public function testIsErrorReturnsTrueForErrorTypes(): void
     {
-        foreach (StatusCode::clientOrServerError() as $type) {
-            $this->assertTrue($type->isClientOrServerError());
-        }
-
-        foreach (StatusCode::cases() as $case) {
-            if (!\in_array($case, StatusCode::clientOrServerError(), true)) {
-                $this->assertFalse($case->isClientOrServerError());
-            }
+        foreach (StatusCode::cases() as $statusCode) {
+            $expected = \in_array($statusCode, StatusCode::error(), true);
+            $this->assertSame($expected, $statusCode->isError());
         }
     }
 
@@ -380,5 +350,18 @@ class StatusCodeTest extends TestCase
                 'expectedMessage' => 'Network Authentication Required',
             ],
         ];
+    }
+
+    public function testToStatusLine(): void
+    {
+        $this->assertSame(
+            '404 Not Found',
+            StatusCode::NOT_FOUND->toStatusLine()
+        );
+
+        $this->assertSame(
+            '200 OK',
+            StatusCode::OK->toStatusLine()
+        );
     }
 }

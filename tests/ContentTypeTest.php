@@ -154,6 +154,70 @@ class ContentTypeTest extends TestCase
         }
     }
 
+    public function testIsXmlReturnsTrueForXmlTypes(): void
+    {
+        foreach (ContentType::xml() as $type) {
+            $this->assertTrue($type->isXml());
+        }
+
+        foreach (ContentType::cases() as $case) {
+            if (!\in_array($case, ContentType::xml(), true)) {
+                $this->assertFalse($case->isXml());
+            }
+        }
+    }
+
+    public function testIsScriptReturnsTrueOnlyForJavascript(): void
+    {
+        foreach (ContentType::cases() as $type) {
+            $expected = $type === ContentType::JAVASCRIPT;
+
+            $this->assertSame($expected, $type->isScript());
+        }
+    }
+
+    public function testIsArchiveReturnsTrueOnlyForZip(): void
+    {
+        foreach (ContentType::cases() as $type) {
+            $expected = $type === ContentType::ZIP;
+
+            $this->assertSame($expected, $type->isArchive());
+        }
+    }
+
+    public function testBaseTypeReturnsCorrectSubtype(): void
+    {
+        $this->assertSame('json', ContentType::JSON->baseType());
+        $this->assertSame('json', ContentType::JSON_API->baseType());
+        $this->assertSame('xml', ContentType::SVG->baseType());
+        $this->assertSame('png', ContentType::PNG->baseType());
+    }
+
+    public function testCategoryReturnsCorrectType(): void
+    {
+        $this->assertSame('application', ContentType::JSON->category());
+        $this->assertSame('image', ContentType::PNG->category());
+        $this->assertSame('audio', ContentType::MP3->category());
+        $this->assertSame('video', ContentType::MP4->category());
+    }
+
+    public function testIsMatchesMimeType(): void
+    {
+        $this->assertTrue(ContentType::JSON->is('application/json'));
+        $this->assertTrue(ContentType::JSON->is('APPLICATION/JSON'));
+
+        $this->assertFalse(ContentType::JSON->is('text/plain'));
+    }
+
+    public function testMatchesSupportsWildcards(): void
+    {
+        $this->assertTrue(ContentType::JSON->matches('application/json'));
+        $this->assertTrue(ContentType::JSON->matches('application/*'));
+        $this->assertTrue(ContentType::JSON->matches('*/*'));
+
+        $this->assertFalse(ContentType::JSON->matches('image/*'));
+    }
+
     #[DataProvider('getExtensionDataProvider')]
     public function testFromExtensionReturnsCorrectType(
         string $extension,

@@ -104,7 +104,7 @@ enum StatusCode: int
         return $this->value >= 500 && $this->value < 600;
     }
 
-    public function isClientOrServerError(): bool
+    public function isError(): bool
     {
         return $this->isClientError() || $this->isServerError();
     }
@@ -178,12 +178,17 @@ enum StatusCode: int
         };
     }
 
+    public function toStatusLine(): string
+    {
+        return \sprintf('%d %s', $this->value, $this->phrase());
+    }
+
     /**
      * @return StatusCode[]
      */
     public static function informational(): array
     {
-        return array_values(array_filter(self::cases(), fn ($case) => $case->isInformational()));
+        return self::filter(fn ($case) => $case->isInformational());
     }
 
     /**
@@ -191,7 +196,7 @@ enum StatusCode: int
      */
     public static function success(): array
     {
-        return array_values(array_filter(self::cases(), fn ($case) => $case->isSuccess()));
+        return self::filter(fn ($case) => $case->isSuccess());
     }
 
     /**
@@ -199,7 +204,7 @@ enum StatusCode: int
      */
     public static function redirection(): array
     {
-        return array_values(array_filter(self::cases(), fn ($case) => $case->isRedirection()));
+        return self::filter(fn ($case) => $case->isRedirection());
     }
 
     /**
@@ -207,7 +212,7 @@ enum StatusCode: int
      */
     public static function clientError(): array
     {
-        return array_values(array_filter(self::cases(), fn ($case) => $case->isClientError()));
+        return self::filter(fn ($case) => $case->isClientError());
     }
 
     /**
@@ -215,14 +220,23 @@ enum StatusCode: int
      */
     public static function serverError(): array
     {
-        return array_values(array_filter(self::cases(), fn ($case) => $case->isServerError()));
+        return self::filter(fn ($case) => $case->isServerError());
     }
 
     /**
      * @return StatusCode[]
      */
-    public static function clientOrServerError(): array
+    public static function error(): array
     {
-        return array_values(array_filter(self::cases(), fn ($case) => $case->isClientOrServerError()));
+        return self::filter(fn ($case) => $case->isError());
+    }
+
+    /**
+     * @param callable(self):bool $fn
+     * @return self[]
+     */
+    private static function filter(callable $fn): array
+    {
+        return array_values(array_filter(self::cases(), $fn));
     }
 }

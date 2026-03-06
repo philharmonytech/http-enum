@@ -43,7 +43,7 @@ enum Scheme: string
 
     public function requiresHost(): bool
     {
-        return match($this) {
+        return match ($this) {
             self::HTTP,
             self::HTTPS,
             self::WS,
@@ -54,11 +54,53 @@ enum Scheme: string
         };
     }
 
+    public function isDefaultPort(int $port): bool
+    {
+        $default = $this->defaultPort();
+
+        return $default !== null && $default === $port;
+    }
+
     public function isSecure(): bool
     {
         return match($this) {
             self::HTTPS, self::WSS, self::SFTP, self::LDAPS, self::SSH => true,
             default => false,
         };
+    }
+
+    public function isHttp(): bool
+    {
+        return $this === self::HTTP || $this === self::HTTPS;
+    }
+
+    public function isWebSocket(): bool
+    {
+        return $this === self::WS || $this === self::WSS;
+    }
+
+    public function isMail(): bool
+    {
+        return match ($this) {
+            self::SMTP,
+            self::IMAP,
+            self::POP => true,
+            default => false,
+        };
+    }
+
+    public function isLdap(): bool
+    {
+        return $this === self::LDAP || $this === self::LDAPS;
+    }
+
+    public static function fromString(string $scheme): self
+    {
+        return self::from(strtolower($scheme));
+    }
+
+    public static function tryFromString(string $scheme): ?self
+    {
+        return self::tryFrom(strtolower($scheme));
     }
 }

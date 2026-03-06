@@ -12,15 +12,15 @@ class HttpMethodTest extends TestCase
 {
     public function testFromReturnsCorrectCase(): void
     {
-        $this->assertSame(HttpMethod::GET, HttpMethod::from('GET'));
-        $this->assertSame(HttpMethod::POST, HttpMethod::from('POST'));
-        $this->assertSame(HttpMethod::PUT, HttpMethod::from('PUT'));
-        $this->assertSame(HttpMethod::DELETE, HttpMethod::from('DELETE'));
-        $this->assertSame(HttpMethod::PATCH, HttpMethod::from('PATCH'));
-        $this->assertSame(HttpMethod::HEAD, HttpMethod::from('HEAD'));
-        $this->assertSame(HttpMethod::OPTIONS, HttpMethod::from('OPTIONS'));
-        $this->assertSame(HttpMethod::TRACE, HttpMethod::from('TRACE'));
-        $this->assertSame(HttpMethod::CONNECT, HttpMethod::from('CONNECT'));
+        foreach (HttpMethod::cases() as $method) {
+            $this->assertSame($method, HttpMethod::from($method->value));
+        }
+    }
+
+    public function testFromIsCaseSensitive(): void
+    {
+        $this->expectException(ValueError::class);
+        HttpMethod::from('get');
     }
 
     public function testTryFromReturnsNullForInvalidValues(): void
@@ -38,65 +38,33 @@ class HttpMethodTest extends TestCase
         HttpMethod::from('INVALID');
     }
 
-    public function testFromIsCaseSensitive(): void
+    public function testFromStringIsCaseInsensitive(): void
     {
-        $this->expectException(ValueError::class);
-        HttpMethod::from('get');
+        $this->assertSame(HttpMethod::GET, HttpMethod::fromString('get'));
+        $this->assertSame(HttpMethod::POST, HttpMethod::fromString('post'));
     }
 
-    public function testTryFromIsCaseSensitive(): void
+    public function testTryFromStringIsCaseInsensitive(): void
     {
-        $this->assertNull(HttpMethod::tryFrom('get'));
-        $this->assertNull(HttpMethod::tryFrom('Get'));
-        $this->assertNull(HttpMethod::tryFrom('POST '));
-        $this->assertNull(HttpMethod::tryFrom('put'));
+        $this->assertSame(HttpMethod::GET, HttpMethod::tryFromString('get'));
+        $this->assertSame(HttpMethod::POST, HttpMethod::tryFromString('post'));
+        $this->assertNull(HttpMethod::tryFromString('boom'));
     }
 
-    public function testIsIdempotentReturnsCorrectValue(): void
+    public function testIsValid(): void
     {
-        $idempotent = [
-            HttpMethod::GET,
-            HttpMethod::HEAD,
-            HttpMethod::PUT,
-            HttpMethod::DELETE,
-            HttpMethod::OPTIONS,
-            HttpMethod::TRACE,
-            HttpMethod::CONNECT,
-        ];
-
-        $nonIdempotent = [
-            HttpMethod::POST,
-            HttpMethod::PATCH,
-        ];
-
-        foreach ($idempotent as $method) {
-            $this->assertTrue($method->isIdempotent());
+        foreach (HttpMethod::cases() as $method) {
+            $this->assertTrue(HttpMethod::isValid($method->value));
         }
 
-        foreach ($nonIdempotent as $method) {
-            $this->assertFalse($method->isIdempotent());
-        }
-    }
-
-    public function testIsValidReturnsTrueForValidMethods(): void
-    {
-        $valid = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS', 'TRACE', 'CONNECT'];
-
-        foreach ($valid as $method) {
-            $this->assertTrue(HttpMethod::isValid($method));
-        }
-    }
-
-    public function testIsValidReturnsFalseForInvalidMethods(): void
-    {
-        $invalid = ['', 'BOOM', 'GETT', 'get', 'Post', 'DELETEE', 'GET ', '123'];
+        $invalid = ['', 'BOOM', 'GETT', '123', 'GET '];
 
         foreach ($invalid as $method) {
             $this->assertFalse(HttpMethod::isValid($method));
         }
     }
 
-    public function testIsSafeReturnsCorrectValue(): void
+    public function testIsSafe(): void
     {
         $safe = [
             HttpMethod::GET,
@@ -105,20 +73,110 @@ class HttpMethodTest extends TestCase
             HttpMethod::TRACE,
         ];
 
-        $unsafe = [
-            HttpMethod::POST,
+        foreach (HttpMethod::cases() as $method) {
+            $expected = \in_array($method, $safe, true);
+            $this->assertSame($expected, $method->isSafe());
+        }
+    }
+
+    public function testIsIdempotent(): void
+    {
+        $expected = [
+            HttpMethod::GET,
+            HttpMethod::HEAD,
             HttpMethod::PUT,
             HttpMethod::DELETE,
-            HttpMethod::PATCH,
+            HttpMethod::OPTIONS,
+            HttpMethod::TRACE,
             HttpMethod::CONNECT,
         ];
 
-        foreach ($safe as $method) {
-            $this->assertTrue($method->isSafe());
+        foreach (HttpMethod::cases() as $method) {
+            $this->assertSame(
+                \in_array($method, $expected, true),
+                $method->isIdempotent()
+            );
         }
+    }
 
-        foreach ($unsafe as $method) {
-            $this->assertFalse($method->isSafe());
+    public function testIsCacheable(): void
+    {
+        $expected = [
+            HttpMethod::GET,
+            HttpMethod::HEAD,
+        ];
+
+        foreach (HttpMethod::cases() as $method) {
+            $this->assertSame(
+                \in_array($method, $expected, true),
+                $method->isCacheable()
+            );
+        }
+    }
+
+    public function testIsReadOnly(): void
+    {
+        $safe = [
+            HttpMethod::GET,
+            HttpMethod::HEAD,
+            HttpMethod::OPTIONS,
+            HttpMethod::TRACE,
+        ];
+
+        foreach (HttpMethod::cases() as $method) {
+            $expected = \in_array($method, $safe, true);
+            $this->assertSame($expected, $method->isReadOnly());
+        }
+    }
+
+    public function testIsWriteOnly(): void
+    {
+        $expected = [
+            HttpMethod::POST,
+            HttpMethod::PUT,
+            HttpMethod::PATCH,
+            HttpMethod::DELETE,
+            HttpMethod::CONNECT,
+        ];
+
+        foreach (HttpMethod::cases() as $method) {
+            $this->assertSame(
+                \in_array($method, $expected, true),
+                $method->isWriteOnly()
+            );
+        }
+    }
+
+    public function testUsuallyHasBody(): void
+    {
+        $expected = [
+            HttpMethod::POST,
+            HttpMethod::PUT,
+            HttpMethod::PATCH,
+        ];
+
+        foreach (HttpMethod::cases() as $method) {
+            $this->assertSame(
+                \in_array($method, $expected, true),
+                $method->usuallyHasBody()
+            );
+        }
+    }
+
+    public function testAllowsBody(): void
+    {
+        $expected = [
+            HttpMethod::POST,
+            HttpMethod::PUT,
+            HttpMethod::PATCH,
+            HttpMethod::DELETE,
+        ];
+
+        foreach (HttpMethod::cases() as $method) {
+            $this->assertSame(
+                \in_array($method, $expected, true),
+                $method->allowsBody()
+            );
         }
     }
 }
