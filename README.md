@@ -121,6 +121,29 @@ if ($scheme->isMail()) { /* Handle IMAP, POP, SMTP */ }
 if ($scheme->isLdap()) { /* Handle LDAP, LDAPS */ }
 ```
 
+### HTTP Headers
+
+```php
+use Philharmony\Http\Enum\HttpHeader;
+
+$header = HttpHeader::CONTENT_TYPE;
+
+if ($header->isContentHeader()) { /* Handle content headers */ }
+if ($header->isCacheHeader()) { /* Handle caching logic */ }
+if ($header->isAuthHeader()) { /* Handle authentication */ }
+if ($header->isSecurityHeader()) { /* Sensitive headers */ }
+if ($header->isCors()) { /* CORS headers */ }
+if ($header->isProxy()) { /* Proxy / forwarded headers */ }
+if ($header->isConditional()) { /* Conditional requests */ }
+
+$header = HttpHeader::fromString('content-type');
+
+echo $header->value; // Content-Type
+
+// HttpHeader::X_FORWARDED_FOR
+$header = HttpHeader::tryFromString('x-forwarded-for');
+```
+
 ## ✨ Enum Methods
 
 Each enum provides a set of utility methods for semantic checks, parsing, and grouping — enabling expressive, safe, and framework-agnostic HTTP handling.
@@ -232,6 +255,28 @@ Represents URI schemes as a backed enum (string) with port mapping.
 | `isWebSocket(): bool`  | Returns `true` for `WS`, `WSS`                                                              |
 | `isMail(): bool`       | Returns `true` for `SMTP`, `IMAP`, `POP`                                                    |
 | `isLdap(): bool`       | Returns `true` for `LDAP`, `LDAPS`                                                          |
+
+### 📨 `HttpHeader`
+
+Represents common HTTP headers as a backed enum (`string`) with semantic grouping and normalization utilities.
+
+| Method                                     | Description                                                          |
+|--------------------------------------------|----------------------------------------------------------------------|
+| `isRequestHeader(): bool`                  | Returns `true` if header is typically used in HTTP requests          |
+| `isResponseHeader(): bool`                 | Returns `true` if header is typically used in HTTP responses         |
+| `isContentHeader(): bool`                  | `Content-*` headers (`Content-Type`, `Content-Length`, etc.)         |
+| `isCors(): bool`                           | `Access-Control-*` headers                                           |
+| `isProxy(): bool`                          | Proxy headers (`X-Forwarded-*`, `X-Real-IP`)                         |
+| `isCacheHeader(): bool`                    | Cache-related headers (`Cache-Control`, `ETag`, `Expires`, etc.)     |
+| `isAuthHeader(): bool`                     | Authentication headers (`Authorization`, `WWW-Authenticate`, etc.)   |
+| `isSecurityHeader(): bool`                 | Security-sensitive headers (`Authorization`, `Cookie`, `Set-Cookie`) |
+| `isConditional(): bool`                    | Conditional request headers (`If-Match`, `If-None-Match`, etc.)      |
+| `fromString(string $header): self`         | Creates enum from header name with normalization                     |
+| `tryFromString(string $header): ?self`     | Safe version returning `null` if header is unknown                   |
+| `from(string $value)`                      | Built-in — creates from header string                                |
+| `tryFrom(string $value)`                   | Built-in — returns `null` if invalid                                 |
+
+> Example: `HttpHeader::fromString('content-type')` → `HttpHeader::CONTENT_TYPE`
 
 
 ## 🧪 Testing
