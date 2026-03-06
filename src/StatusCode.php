@@ -180,7 +180,7 @@ enum StatusCode: int
 
     public function toStatusLine(): string
     {
-        return sprintf('%d %s', $this->value, $this->phrase());
+        return \sprintf('%d %s', $this->value, $this->phrase());
     }
 
     /**

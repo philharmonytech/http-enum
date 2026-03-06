@@ -260,7 +260,7 @@ class SchemeTest extends TestCase
     public function testIsHttp(): void
     {
         foreach (Scheme::cases() as $type) {
-            $expected = in_array($type, [Scheme::HTTPS, Scheme::HTTP,], true);
+            $expected = \in_array($type, [Scheme::HTTPS, Scheme::HTTP,], true);
 
             $this->assertSame($expected, $type->isHttp());
         }
@@ -269,7 +269,7 @@ class SchemeTest extends TestCase
     public function testIsWebSocket(): void
     {
         foreach (Scheme::cases() as $type) {
-            $expected = in_array($type, [Scheme::WS, Scheme::WSS,], true);
+            $expected = \in_array($type, [Scheme::WS, Scheme::WSS,], true);
 
             $this->assertSame($expected, $type->isWebSocket());
         }
@@ -278,7 +278,7 @@ class SchemeTest extends TestCase
     public function testIsMail(): void
     {
         foreach (Scheme::cases() as $type) {
-            $expected = in_array($type, [Scheme::SMTP, Scheme::IMAP, Scheme::POP], true);
+            $expected = \in_array($type, [Scheme::SMTP, Scheme::IMAP, Scheme::POP], true);
 
             $this->assertSame($expected, $type->isMail());
         }
@@ -287,7 +287,7 @@ class SchemeTest extends TestCase
     public function testIsLdap(): void
     {
         foreach (Scheme::cases() as $type) {
-            $expected = in_array($type, [Scheme::LDAP, Scheme::LDAPS,], true);
+            $expected = \in_array($type, [Scheme::LDAP, Scheme::LDAPS,], true);
 
             $this->assertSame($expected, $type->isLdap());
         }

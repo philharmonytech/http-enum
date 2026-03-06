@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Philharmony\Http\Enum\Tests;
 
 use Philharmony\Http\Enum\HttpHeader;

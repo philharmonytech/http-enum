@@ -74,7 +74,7 @@ class HttpMethodTest extends TestCase
         ];
 
         foreach (HttpMethod::cases() as $method) {
-            $expected = in_array($method, $safe, true);
+            $expected = \in_array($method, $safe, true);
             $this->assertSame($expected, $method->isSafe());
         }
     }
@@ -93,7 +93,7 @@ class HttpMethodTest extends TestCase
 
         foreach (HttpMethod::cases() as $method) {
             $this->assertSame(
-                in_array($method, $expected, true),
+                \in_array($method, $expected, true),
                 $method->isIdempotent()
             );
         }
@@ -108,7 +108,7 @@ class HttpMethodTest extends TestCase
 
         foreach (HttpMethod::cases() as $method) {
             $this->assertSame(
-                in_array($method, $expected, true),
+                \in_array($method, $expected, true),
                 $method->isCacheable()
             );
         }
@@ -124,7 +124,7 @@ class HttpMethodTest extends TestCase
         ];
 
         foreach (HttpMethod::cases() as $method) {
-            $expected = in_array($method, $safe, true);
+            $expected = \in_array($method, $safe, true);
             $this->assertSame($expected, $method->isReadOnly());
         }
     }
@@ -141,7 +141,7 @@ class HttpMethodTest extends TestCase
 
         foreach (HttpMethod::cases() as $method) {
             $this->assertSame(
-                in_array($method, $expected, true),
+                \in_array($method, $expected, true),
                 $method->isWriteOnly()
             );
         }
@@ -157,7 +157,7 @@ class HttpMethodTest extends TestCase
 
         foreach (HttpMethod::cases() as $method) {
             $this->assertSame(
-                in_array($method, $expected, true),
+                \in_array($method, $expected, true),
                 $method->usuallyHasBody()
             );
         }
@@ -174,7 +174,7 @@ class HttpMethodTest extends TestCase
 
         foreach (HttpMethod::cases() as $method) {
             $this->assertSame(
-                in_array($method, $expected, true),
+                \in_array($method, $expected, true),
                 $method->allowsBody()
             );
         }

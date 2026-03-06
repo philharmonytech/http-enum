@@ -34,7 +34,7 @@ class StatusCodeTest extends TestCase
     public function testIsInformationalReturnsTrueForInformationalTypes(): void
     {
         foreach (StatusCode::cases() as $statusCode) {
-            $expected = in_array($statusCode, StatusCode::informational(), true);
+            $expected = \in_array($statusCode, StatusCode::informational(), true);
             $this->assertSame($expected, $statusCode->isInformational());
         }
     }
@@ -42,7 +42,7 @@ class StatusCodeTest extends TestCase
     public function testIsSuccessReturnsTrueForSuccessTypes(): void
     {
         foreach (StatusCode::cases() as $statusCode) {
-            $expected = in_array($statusCode, StatusCode::success(), true);
+            $expected = \in_array($statusCode, StatusCode::success(), true);
             $this->assertSame($expected, $statusCode->isSuccess());
         }
     }
@@ -50,7 +50,7 @@ class StatusCodeTest extends TestCase
     public function testIsRedirectionReturnsTrueForRedirectionTypes(): void
     {
         foreach (StatusCode::cases() as $statusCode) {
-            $expected = in_array($statusCode, StatusCode::redirection(), true);
+            $expected = \in_array($statusCode, StatusCode::redirection(), true);
             $this->assertSame($expected, $statusCode->isRedirection());
         }
     }
@@ -58,7 +58,7 @@ class StatusCodeTest extends TestCase
     public function testIsClientErrorReturnsTrueForClientErrorTypes(): void
     {
         foreach (StatusCode::cases() as $statusCode) {
-            $expected = in_array($statusCode, StatusCode::clientError(), true);
+            $expected = \in_array($statusCode, StatusCode::clientError(), true);
             $this->assertSame($expected, $statusCode->isClientError());
         }
     }
@@ -66,7 +66,7 @@ class StatusCodeTest extends TestCase
     public function testIsServerErrorReturnsTrueForServerErrorTypes(): void
     {
         foreach (StatusCode::cases() as $statusCode) {
-            $expected = in_array($statusCode, StatusCode::serverError(), true);
+            $expected = \in_array($statusCode, StatusCode::serverError(), true);
             $this->assertSame($expected, $statusCode->isServerError());
         }
     }
@@ -74,7 +74,7 @@ class StatusCodeTest extends TestCase
     public function testIsErrorReturnsTrueForErrorTypes(): void
     {
         foreach (StatusCode::cases() as $statusCode) {
-            $expected = in_array($statusCode, StatusCode::error(), true);
+            $expected = \in_array($statusCode, StatusCode::error(), true);
             $this->assertSame($expected, $statusCode->isError());
         }
     }
