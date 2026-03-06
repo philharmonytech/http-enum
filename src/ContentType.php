@@ -28,7 +28,7 @@ enum ContentType: string
     case ZIP = 'application/zip';
     case OCTET_STREAM = 'application/octet-stream';
     case MSGPACK = 'application/msgpack';
-    case PROTBUF = 'application/protobuf';
+    case PROTOBUF = 'application/protobuf';
 
     case PNG = 'image/png';
     case JPEG = 'image/jpeg';
@@ -54,16 +54,59 @@ enum ContentType: string
     case TTF = 'font/ttf';
     case OTF = 'font/otf';
 
+    /**
+     * @var array<string, self>
+     */
+    private const EXTENSION_MAP = [
+        'txt' => self::TEXT,
+        'html' => self::HTML,
+        'htm' => self::HTML,
+        'xml' => self::XML,
+        'css' => self::CSS,
+        'js' => self::JAVASCRIPT,
+        'csv' => self::CSV,
+        'md' => self::MARKDOWN,
+        'json' => self::JSON,
+        'pdf' => self::PDF,
+        'zip' => self::ZIP,
+        'png' => self::PNG,
+        'jpg' => self::JPEG,
+        'jpeg' => self::JPEG,
+        'gif' => self::GIF,
+        'webp' => self::WEBP,
+        'svg' => self::SVG,
+        'ico' => self::ICON,
+        'heic' => self::HEIC,
+        'mp3' => self::MP3,
+        'wav' => self::WAV,
+        'mp4' => self::MP4,
+        'mpeg' => self::MPEG,
+        'mpg' => self::MPEG,
+        'webm' => self::WEBM,
+        'woff' => self::WOFF,
+        'woff2' => self::WOFF2,
+        'ttf' => self::TTF,
+        'otf' => self::OTF,
+    ];
+
     public function isTextBased(): bool
     {
-        return str_starts_with($this->value, 'text/') ||
-            \in_array($this, [self::JSON, self::JAVASCRIPT, self::XML, self::CSV, self::MARKDOWN,], true);
+        return str_starts_with($this->value, 'text/')
+            || $this->isJson()
+            || $this->isXml()
+            || $this === self::JAVASCRIPT;
     }
 
     public function isJson(): bool
     {
-        return $this->value === 'application/json'
+        return $this === self::JSON
             || str_ends_with($this->value, '+json');
+    }
+
+    public function isXml(): bool
+    {
+        return $this === self::XML
+            || str_ends_with($this->value, '+xml');
     }
 
     public function isImage(): bool
@@ -104,53 +147,68 @@ enum ContentType: string
                 self::PDF,
                 self::ZIP,
                 self::MSGPACK,
-                self::PROTBUF,
+                self::PROTOBUF,
                 self::OCTET_STREAM,
             ], true);
     }
 
+    public function isScript(): bool
+    {
+        return $this === self::JAVASCRIPT;
+    }
+
+    public function isArchive(): bool
+    {
+        return $this === self::ZIP;
+    }
+
+    public function baseType(): string
+    {
+        $type = explode('/', $this->value)[1];
+
+        if (str_contains($type, '+')) {
+            return explode('+', $type)[1];
+        }
+
+        return $type;
+    }
+
+    public function category(): string
+    {
+        return explode('/', $this->value, 2)[0];
+    }
+
+    public function is(string $type): bool
+    {
+        return strcasecmp($this->value, $type) === 0;
+    }
+
+    public function matches(string $pattern): bool
+    {
+        if ($pattern === '*/*') {
+            return true;
+        }
+
+        if (str_ends_with($pattern, '/*')) {
+            $prefix = substr($pattern, 0, -1);
+            return str_starts_with($this->value, $prefix);
+        }
+
+        return $this->value === $pattern;
+    }
+
     public static function fromHeader(string $header): ?self
     {
-        $type = strtolower(trim(explode(';', $header)[0] ?? ''));
-        foreach (self::cases() as $case) {
-            if ($case->value === $type) {
-                return $case;
-            }
-        }
-        return null;
+        $type = strtolower(trim(explode(';', $header, 2)[0]));
+
+        return self::tryFrom($type);
     }
 
     public static function fromExtension(string $extension): ?self
     {
-        return match (strtolower($extension)) {
-            'txt' => self::TEXT,
-            'html', 'htm' => self::HTML,
-            'xml' => self::XML,
-            'css' => self::CSS,
-            'js' => self::JAVASCRIPT,
-            'csv' => self::CSV,
-            'md' => self::MARKDOWN,
-            'json' => self::JSON,
-            'pdf' => self::PDF,
-            'zip' => self::ZIP,
-            'png' => self::PNG,
-            'jpg', 'jpeg' => self::JPEG,
-            'gif' => self::GIF,
-            'webp' => self::WEBP,
-            'svg' => self::SVG,
-            'ico' => self::ICON,
-            'heic' => self::HEIC,
-            'mp3' => self::MP3,
-            'wav' => self::WAV,
-            'mp4' => self::MP4,
-            'mpeg', 'mpg' => self::MPEG,
-            'webm' => self::WEBM,
-            'woff' => self::WOFF,
-            'woff2' => self::WOFF2,
-            'ttf' => self::TTF,
-            'otf' => self::OTF,
-            default => null,
-        };
+        $extension = strtolower($extension);
+
+        return self::EXTENSION_MAP[$extension] ?? null;
     }
 
     /**
@@ -167,6 +225,14 @@ enum ContentType: string
     public static function json(): array
     {
         return array_values(array_filter(self::cases(), fn ($case) => $case->isJson()));
+    }
+
+    /**
+     * @return ContentType[]
+     */
+    public static function xml(): array
+    {
+        return array_values(array_filter(self::cases(), fn ($case) => $case->isXml()));
     }
 
     /**
