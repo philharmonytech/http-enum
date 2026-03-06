@@ -24,11 +24,12 @@ Type-safe HTTP enums for PHP: methods, status codes, headers, content types, sch
 - `HttpVersion` — HTTP protocol versions with parsing utilities
 - `CacheDirective` — Cache-Control directives for HTTP caching behavior
 - `ContentEncoding` — HTTP compression algorithms (gzip, br, deflate, etc.)
+- `SameSite` — cookie SameSite policies for cross-site request protection
 
 Built for **clean, expressive, and safe code**, this lightweight library requires **PHP 8.1+** and has **zero runtime dependencies**.  
 It is ideal for **frameworks, middleware, SDKs, and reusable components**.
 
-### 📚 Included Enums
+## 📚 Included Enums
 
 - `HttpMethod`
 - `StatusCode`
@@ -39,6 +40,44 @@ It is ideal for **frameworks, middleware, SDKs, and reusable components**.
 - `HttpVersion`
 - `CacheDirective`
 - `ContentEncoding`
+- `SameSite`
+
+## ✨ Why Use This Library?
+
+Working with HTTP often involves raw strings and magic numbers:
+
+```php
+if ($method === 'POST') { ... }
+if ($status >= 400) { ... }
+if ($header === 'Content-Type') { ... }
+```
+
+This library replaces them with **type-safe enums:**
+
+```php
+if ($method === HttpMethod::POST) { ... }
+if ($status->isError()) { ... }
+if ($header === HttpHeader::CONTENT_TYPE) { ... }
+```
+
+Benefits:
+
+- ✅ Type safety — eliminates invalid values
+- ✅ Better IDE autocompletion
+- ✅ Self-documenting code
+- ✅ RFC-aligned semantics
+- ✅ Zero runtime dependencies
+
+## 🚀 Features
+
+- 🧩 10 HTTP enums
+- ⚡ Zero dependencies
+- 🧬 Strict typing
+- 🔌 Framework agnostic
+- 🧠 Semantic helper methods
+- 📏 RFC-aligned behavior
+- ✅ Fully tested
+- 🧰 Developer-friendly utilities
 
 ## 📦 Installation
 
@@ -52,7 +91,7 @@ composer require philharmony/http-enum
 
 - PHP 8.1 or higher
 
-## 🚀 Usage
+## 🛠 Usage
 
 ### HTTP Methods
 
@@ -219,6 +258,21 @@ $encoding = ContentEncoding::fromString('gzip');
 if ($encoding->isCompressed()) { /* Handle compressed response */ }
 
 $encoding = ContentEncoding::tryFromString('br');
+```
+
+### SameSite Cookie Policy
+
+```php
+use Philharmony\Http\Enum\SameSite;
+
+$sameSite = SameSite::STRICT;
+
+if ($sameSite->isStrict()) { /* Strict cookie policy */ }
+if ($sameSite->allowsCrossSite()) { /* Allows cross-site cookies */ }
+
+$sameSite = SameSite::fromString('lax');
+
+$sameSite = SameSite::tryFromString('none');
 ```
 
 ## ✨ Enum Methods
@@ -404,7 +458,7 @@ Represents `Cache-Control` directives used to control HTTP caching behavior.
 
 > Example: `CacheDirective::fromString('no-cache')` → `CacheDirective::NO_CACHE`
 
-### 📦 `ContentEncoding`
+### 🗜 `ContentEncoding`
 
 Represents compression algorithms used in `Content-Encoding` and `Accept-Encoding` headers.
 
@@ -416,6 +470,29 @@ Represents compression algorithms used in `Content-Encoding` and `Accept-Encodin
 | `from(string $value)`             | Built-in — creates enum from valid string                          |
 | `tryFrom(string $value)`          | Built-in — returns `null` if invalid                               |
 
+### 🍪 `SameSite`
+
+Represents cookie SameSite policies used in `Set-Cookie` headers to control cross-site request behavior.
+
+| Method                         | Description                                                         |
+|--------------------------------|---------------------------------------------------------------------|
+| `isStrict(): bool`             | Returns `true` if policy is `Strict`                                |
+| `allowsCrossSite(): bool`      | Returns `true` if cookies may be sent with cross-site requests      |
+| `fromString(string $value)`    | Creates enum from SameSite string                                   |
+| `tryFromString(string $value)` | Safe version returning `null` if invalid                            |
+| `from(string $value)`          | Built-in — creates enum from valid string                           |
+| `tryFrom(string $value)`       | Built-in — returns `null` if invalid                                |
+
+## 📜 RFC Compliance
+
+This library follows behavior defined in several HTTP specifications:
+
+- **RFC 9110** — HTTP Semantics
+- **RFC 9111** — HTTP Caching
+- **RFC 9112** — HTTP/1.1
+- **RFC 7231** — HTTP Methods
+- **RFC 6265** — HTTP Cookies (SameSite)
+- **RFC 6454** — Web Origin Concept
 
 ## 🧪 Testing
 
