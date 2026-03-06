@@ -47,7 +47,7 @@
     }
   },
   "scripts": {
-    "test": "phpunit",
+    "test": "phpunit --colors=always",
     "test:coverage": "phpunit --coverage-clover coverage.xml --coverage-html coverage --coverage-filter src",
     "phpstan": "phpstan analyse --memory-limit=1G",
     "cs-check": "php-cs-fixer fix --dry-run --allow-risky=yes",
