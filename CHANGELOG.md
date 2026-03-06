@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [1.2.0] - 2026-03-06
+## [1.2.0] - 2026-03-07
 
 ### Added
 - Added new HTTP enums:
