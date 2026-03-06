@@ -22,6 +22,7 @@ Type-safe HTTP enums for PHP: methods, status codes, content types and scheme �
 - `HttpHeader` — common HTTP headers with semantic grouping and utilities
 - `AuthScheme` — HTTP authentication schemes (Basic, Bearer, Digest, OAuth, etc.)
 - `HttpVersion` — HTTP protocol versions with parsing utilities
+- `CacheDirective` — Cache-Control directives for HTTP caching behavior
 
 Built for **clean, expressive, and safe code**, this lightweight library requires no dependencies beyond PHP 8.1+ and is ideal for frameworks, middleware, and reusable components.
 
@@ -175,6 +176,23 @@ $version = HttpVersion::fromProtocol('HTTP/2');
 if ($version === HttpVersion::HTTP_2) { /* HTTP/2 logic */ }
 
 $version = HttpVersion::tryFromString('1.1');
+```
+
+### Cache-Control Directives
+
+```php
+use Philharmony\Http\Enum\CacheDirective;
+
+$directive = CacheDirective::MAX_AGE;
+
+if ($directive->isExpiration()) { /* max-age, s-maxage */ }
+if ($directive->isRestriction()) { /* no-cache, no-store */ }
+if ($directive->isVisibility()) { /* public, private */ }
+
+$directive = CacheDirective::fromString('no-cache');
+echo $directive->value; // no-cache
+
+$directive = CacheDirective::tryFromString('public');
 ```
 
 ## ✨ Enum Methods
@@ -343,6 +361,22 @@ Represents HTTP protocol versions.
 | `tryFrom(string $value)`           | Built-in — returns `null` if invalid                            |
 
 > Example: `HttpVersion::fromProtocol('HTTP/1.1')` → `HttpVersion::HTTP_1_1`
+
+### 🗄️ `CacheDirective`
+
+Represents `Cache-Control` directives used to control HTTP caching behavior.
+
+| Method                               | Description                                                         |
+|--------------------------------------|---------------------------------------------------------------------|
+| `isRestriction(): bool`              | Returns `true` for cache restrictions (`no-cache`, `no-store`)      |
+| `isExpiration(): bool`               | Returns `true` for expiration directives (`max-age`, `s-maxage`)    |
+| `isVisibility(): bool`               | Returns `true` for cache visibility (`public`, `private`)           |
+| `fromString(string $directive)`      | Creates enum from directive string (case-insensitive)               |
+| `tryFromString(string $directive)`   | Safe version returning `null` if directive is unknown               |
+| `from(string $value)`                | Built-in — creates enum from valid string                           |
+| `tryFrom(string $value)`             | Built-in — returns `null` if invalid                                |
+
+> Example: `CacheDirective::fromString('no-cache')` → `CacheDirective::NO_CACHE`
 
 ## 🧪 Testing
 
