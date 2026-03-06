@@ -34,8 +34,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
 
       - uses: shivammathur/setup-php@v2
         with:
@@ -48,9 +46,10 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
-          key: composer-${{ hashFiles('composer.lock') }}
+          key: composer-${{ runner.os }}-${{ hashFiles('composer.json') }}
 
-      - run: composer install --prefer-dist --no-progress
+      - name: Install dependencies
+        run: composer update --prefer-dist --no-progress
 
       - name: PHPStan
         run: composer phpstan
@@ -76,7 +75,8 @@ jobs:
           php-version: ${{ matrix.php }}
           coverage: xdebug
 
-      - run: composer install --prefer-dist --no-progress
+      - name: Install dependencies
+        run: composer update --prefer-dist --no-progress
 
       - name: Run tests
         run: composer test
