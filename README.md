@@ -528,3 +528,14 @@ composer cs-fix
 ## 📄 License
 
 This package is open-source and licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome.
+
+If you find a bug or have an idea for improvement, please open an issue or submit a pull request.
+
+## ⭐ Support
+
+If you find this package useful, please consider giving it a star on GitHub.
+It helps the project grow and reach more developers.
