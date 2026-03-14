@@ -57,12 +57,14 @@ class SchemeTest extends TestCase
     {
         $this->assertSame(Scheme::HTTP, Scheme::tryFromString('HTTP'));
         $this->assertSame(Scheme::SMTP, Scheme::tryFromString('SMTP'));
+        $this->assertSame(Scheme::SMTP, Scheme::tryFromString('  SMTP  '));
     }
 
     public function testFromStringIsCaseInsensitive(): void
     {
         $this->assertSame(Scheme::HTTPS, Scheme::fromString('HTTPS'));
         $this->assertSame(Scheme::IMAP, Scheme::fromString('IMAP'));
+        $this->assertSame(Scheme::IMAP, Scheme::fromString('  IMAP  '));
     }
 
     #[DataProvider('schemePortDataProvider')]
