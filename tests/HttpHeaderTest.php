@@ -36,6 +36,16 @@ class HttpHeaderTest extends TestCase
             HttpHeader::CONTENT_TYPE,
             HttpHeader::fromString('Content-Type')
         );
+
+        $this->assertSame(
+            HttpHeader::ETAG,
+            HttpHeader::fromString('ETag')
+        );
+
+        $this->assertSame(
+            HttpHeader::WWW_AUTHENTICATE,
+            HttpHeader::fromString('WWW-Authenticate')
+        );
     }
 
     public function testTryFromString(): void
@@ -50,14 +60,63 @@ class HttpHeaderTest extends TestCase
         );
     }
 
+    public function testFromStringThrowsOnInvalid(): void
+    {
+        $this->expectException(\ValueError::class);
+        HttpHeader::fromString('invalid-header');
+    }
+
     public function testRequestAndResponseHeadersAreMutuallyExclusive(): void
     {
         foreach (HttpHeader::cases() as $header) {
-            if ($header->isResponseHeader()) {
+            if ($header->isResponseHeader() && !$header->isGeneralHeader()) {
                 $this->assertFalse($header->isRequestHeader());
             } else {
                 $this->assertTrue($header->isRequestHeader());
             }
+        }
+    }
+
+    public function testRequestOnlyAndResponseOnlyAreMutuallyExclusive(): void
+    {
+        foreach (HttpHeader::cases() as $header) {
+            $this->assertFalse($header->isRequestOnly() && $header->isResponseOnly());
+        }
+    }
+
+    public function testGeneralHeaders(): void
+    {
+        $general = [
+            HttpHeader::CACHE_CONTROL,
+            HttpHeader::CONNECTION,
+            HttpHeader::DATE,
+            HttpHeader::PRAGMA,
+            HttpHeader::TRANSFER_ENCODING,
+            HttpHeader::TRAILER,
+            HttpHeader::UPGRADE,
+            HttpHeader::VIA,
+        ];
+
+        foreach ($general as $header) {
+            $this->assertTrue($header->isGeneralHeader());
+        }
+    }
+
+    public function testHopByHopHeaders(): void
+    {
+        $hopByHop = [
+            HttpHeader::CONNECTION,
+            HttpHeader::KEEP_ALIVE,
+            HttpHeader::PROXY_AUTHENTICATE,
+            HttpHeader::PROXY_AUTHORIZATION,
+            HttpHeader::TE,
+            HttpHeader::TRAILER,
+            HttpHeader::TRANSFER_ENCODING,
+            HttpHeader::UPGRADE,
+        ];
+
+        foreach ($hopByHop as $header) {
+            $this->assertTrue($header->isHopByHop());
         }
     }
 
