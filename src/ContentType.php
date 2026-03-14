@@ -197,6 +197,21 @@ enum ContentType: string
         return $this->value === $pattern;
     }
 
+    public function isCompressible(): bool
+    {
+        return $this->isTextBased()
+            || $this->isJson()
+            || $this->isXml()
+            || $this === self::JAVASCRIPT;
+    }
+
+    public function defaultCharset(): ?string
+    {
+        return $this->isTextBased() || $this->isJson() || $this->isXml()
+            ? 'utf-8'
+            : null;
+    }
+
     public static function fromHeader(string $header): ?self
     {
         $type = strtolower(trim(explode(';', $header, 2)[0]));
@@ -204,9 +219,81 @@ enum ContentType: string
         return self::tryFrom($type);
     }
 
+    public static function fromFilename(string $filename): ?self
+    {
+        $extension = pathinfo($filename, PATHINFO_EXTENSION);
+        if ($extension === '') {
+            return null;
+        }
+
+        return self::fromExtension($extension);
+    }
+
+    /**
+     * @param ContentType[] $available
+     */
+    public static function negotiate(string $accept, array $available): ?self
+    {
+        $accept = trim($accept);
+        if ($accept === '' || $available === []) {
+            return null;
+        }
+
+        $parts = array_map('trim', explode(',', $accept));
+        $candidates = [];
+
+        foreach ($parts as $index => $part) {
+            if ($part === '') {
+                continue;
+            }
+
+            $segments = array_map('trim', explode(';', $part));
+            $mime = strtolower($segments[0] ?? '');
+            if ($mime === '') {
+                continue;
+            }
+
+            $q = 1.0;
+            foreach (\array_slice($segments, 1) as $segment) {
+                if (str_starts_with($segment, 'q=')) {
+                    $qValue = (float) substr($segment, 2);
+                    $q = max(0.0, min(1.0, $qValue));
+                    break;
+                }
+            }
+
+            $candidates[] = [
+                'mime' => $mime,
+                'q' => $q,
+                'pos' => $index,
+                'specificity' => self::acceptSpecificity($mime),
+            ];
+        }
+
+        usort($candidates, static function (array $a, array $b): int {
+            if ($a['q'] === $b['q']) {
+                if ($a['specificity'] === $b['specificity']) {
+                    return $a['pos'] <=> $b['pos'];
+                }
+                return $a['specificity'] < $b['specificity'] ? 1 : -1;
+            }
+            return $a['q'] < $b['q'] ? 1 : -1;
+        });
+
+        foreach ($candidates as $candidate) {
+            foreach ($available as $type) {
+                if ($type->matches($candidate['mime'])) {
+                    return $type;
+                }
+            }
+        }
+
+        return null;
+    }
+
     public static function fromExtension(string $extension): ?self
     {
-        $extension = strtolower($extension);
+        $extension = strtolower(ltrim($extension, '.'));
 
         return self::EXTENSION_MAP[$extension] ?? null;
     }
@@ -289,5 +376,16 @@ enum ContentType: string
     public static function binary(): array
     {
         return array_values(array_filter(self::cases(), fn ($case) => $case->isBinary()));
+    }
+
+    private static function acceptSpecificity(string $mime): int
+    {
+        if ($mime === '*/*') {
+            return 0;
+        }
+        if (str_ends_with($mime, '/*')) {
+            return 1;
+        }
+        return 2;
     }
 }

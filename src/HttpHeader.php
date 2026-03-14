@@ -55,6 +55,8 @@ enum HttpHeader: string
     case IF_UNMODIFIED_SINCE = 'If-Unmodified-Since';
 
     case TRANSFER_ENCODING = 'Transfer-Encoding';
+    case TE = 'TE';
+    case TRAILER = 'Trailer';
     case VARY = 'Vary';
     case VIA = 'Via';
 
@@ -76,13 +78,11 @@ enum HttpHeader: string
             self::SET_COOKIE,
             self::LOCATION,
             self::SERVER,
-            self::CACHE_CONTROL,
             self::CONTENT_TYPE,
             self::CONTENT_LENGTH,
             self::CONTENT_ENCODING,
             self::CONTENT_LANGUAGE,
             self::CONTENT_RANGE,
-            self::CONNECTION,
             self::ETAG,
             self::LAST_MODIFIED,
             self::TRANSFER_ENCODING,
@@ -94,7 +94,21 @@ enum HttpHeader: string
 
     public function isRequestHeader(): bool
     {
+        if ($this->isGeneralHeader()) {
+            return true;
+        }
+
         return !$this->isResponseHeader();
+    }
+
+    public function isRequestOnly(): bool
+    {
+        return !$this->isResponseHeader() && !$this->isGeneralHeader();
+    }
+
+    public function isResponseOnly(): bool
+    {
+        return $this->isResponseHeader() && !$this->isGeneralHeader();
     }
 
     public function isContentHeader(): bool
@@ -171,23 +185,60 @@ enum HttpHeader: string
         };
     }
 
+    public function isGeneralHeader(): bool
+    {
+        return match ($this) {
+            self::CACHE_CONTROL,
+            self::CONNECTION,
+            self::DATE,
+            self::PRAGMA,
+            self::TRANSFER_ENCODING,
+            self::TRAILER,
+            self::UPGRADE,
+            self::VIA => true,
+            default => false,
+        };
+    }
+
+    public function isHopByHop(): bool
+    {
+        return \in_array($this, [
+            self::CONNECTION,
+            self::KEEP_ALIVE,
+            self::PROXY_AUTHENTICATE,
+            self::PROXY_AUTHORIZATION,
+            self::TE,
+            self::TRAILER,
+            self::TRANSFER_ENCODING,
+            self::UPGRADE,
+        ], true);
+    }
+
     public static function fromString(string $header): self
     {
-        return self::from(self::normalize($header));
+        $value = self::tryFromString($header);
+        if ($value === null) {
+            throw new \ValueError(\sprintf('Invalid header "%s"', $header));
+        }
+
+        return $value;
     }
 
     public static function tryFromString(string $header): ?self
     {
-        return self::tryFrom(self::normalize($header));
+        $normalized = self::normalize($header);
+
+        foreach (self::cases() as $case) {
+            if (strtolower($case->value) === $normalized) {
+                return $case;
+            }
+        }
+
+        return null;
     }
 
     private static function normalize(string $header): string
     {
-        $header = strtolower($header);
-
-        return implode('-', array_map(
-            'ucfirst',
-            explode('-', $header)
-        ));
+        return strtolower(trim($header));
     }
 }

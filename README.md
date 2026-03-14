@@ -122,6 +122,9 @@ if ($status->isRedirection()) { /* 3xx */ }
 if ($status->isClientError()) { /* 4xx */ }
 if ($status->isServerError()) { /* 5xx */ }
 if ($status->isError()) { /* 4xx and 5xx */ }
+if ($status->isCacheable()) { /* Cacheable by default (RFC 9111) */ }
+if ($status->statusClass() === 4) { /* client error */ }
+if ($status->category() === 'server_error') { /* 5xx */ }
 if ($status->phrase() === 'Not Found') { /* Semantic phrases */ }
 
 echo StatusCode::NOT_FOUND->toStatusLine(); // 404 Not Found
@@ -147,11 +150,18 @@ if ($contentType->isForm()) { /* Handle for form types */ }
 if ($contentType->isBinary()) { /* Handle for binary types */ }
 if ($contentType->isScript()) { /* Handle for script type */ }
 if ($contentType->isArchive()) { /* Handle for archive type */ }
+if ($contentType->isCompressible()) { /* Enable gzip/br compression */ }
 
 $type = ContentType::fromHeader('application/json; charset=utf-8');
 if ($type?->isJson()) { /* Handle JSON */ }
 
 $type = ContentType::fromExtension('txt');
+header('Content-Type: ' . $type->value);
+
+$type = ContentType::fromExtension('.json');
+header('Content-Type: ' . $type->value);
+
+$type = ContentType::fromFilename('image.png');
 header('Content-Type: ' . $type->value);
 
 echo ContentType::JSON->baseType(); // 'json'
@@ -160,6 +170,11 @@ echo ContentType::JSON->is('application/json'); // true
 echo ContentType::JSON->is('APPLICATION/JSON'); // true
 echo ContentType::JSON->matches('application/*');  // true
 echo ContentType::PNG->matches('image/*');        // true
+
+$best = ContentType::negotiate(
+    'application/json, text/html;q=0.9',
+    [ContentType::JSON, ContentType::HTML, ContentType::XML]
+);
 ```
 
 ### URI Schemes & Ports
@@ -350,12 +365,16 @@ Represents media types as a backed enum (`string`) with parsing and detection ut
 | `isBinary(): bool`                        | Includes media, fonts, PDF, ZIP, Protobuf, etc.                                                 |
 | `isScript(): bool`                        | `application/javascript`                                                                        |
 | `isArchive(): bool`                       | `application/zip`                                                                               |
+| `isCompressible(): bool`                  | Returns `true` for types suitable for compression                                                |
+| `defaultCharset(): ?string`               | Returns default charset for text-like types (heuristic)                                           |
 | `baseType(): string`                      | Returns base subtype (e.g. `application/json` → `json`)                                         |
 | `category(): string`                      | Returns MIME category (e.g. `json`, `image`, `video`, `audio`, `text`)                          |
 | `is(): bool`                              | Case-insensitive exact match for MIME type                                                      |
 | `matches(): bool`                         | Pattern match like `image/*`, `application/*`                                                   |
 | `fromHeader(string $header): ?self`       | Parses from `Content-Type` header (ignores parameters like `; charset=utf-8`)                   |
 | `fromExtension(string $extension): ?self` | Maps file extension (e.g., `.json`, `.png`) to content type                                     |
+| `fromFilename(string $filename): ?self`   | Maps filename to content type by extension                                                       |
+| `negotiate(string $accept, array $available): ?self` | Chooses best type from `Accept` header (q + specificity)                  |
 | `from(string $value)`                     | Built-in — creates from MIME type                                                               |
 | `tryFrom(string $value)`                  | Built-in — returns `null` if invalid                                                            |
 
@@ -386,6 +405,8 @@ Represents URI schemes as a backed enum (string) with port mapping.
 | `isWebSocket(): bool`  | Returns `true` for `WS`, `WSS`                                                              |
 | `isMail(): bool`       | Returns `true` for `SMTP`, `IMAP`, `POP`                                                    |
 | `isLdap(): bool`       | Returns `true` for `LDAP`, `LDAPS`                                                          |
+| `fromString(string $scheme)` | Creates enum from scheme string (case-insensitive, trims input)                         |
+| `tryFromString(string $scheme)` | Safe version returning `null` if invalid                                         |
 
 ### 📨 `HttpHeader`
 
@@ -402,12 +423,17 @@ Represents common HTTP headers as a backed enum (`string`) with semantic groupin
 | `isAuthHeader(): bool`                     | Authentication headers (`Authorization`, `WWW-Authenticate`, etc.)   |
 | `isSecurityHeader(): bool`                 | Security-sensitive headers (`Authorization`, `Cookie`, `Set-Cookie`) |
 | `isConditional(): bool`                    | Conditional request headers (`If-Match`, `If-None-Match`, etc.)      |
-| `fromString(string $header): self`         | Creates enum from header name with normalization                     |
+| `isGeneralHeader(): bool`                  | General headers (`Cache-Control`, `Connection`, `Date`, etc.)        |
+| `isRequestOnly(): bool`                    | Returns `true` if header is request-only (excludes response/general) |
+| `isResponseOnly(): bool`                   | Returns `true` if header is response-only (excludes general)         |
+| `isHopByHop(): bool`                       | Hop-by-hop headers (RFC 7230, includes `TE` and `Trailer`)           |
+| `fromString(string $header): self`         | Creates enum from header name (case-insensitive, trims input)        |
 | `tryFromString(string $header): ?self`     | Safe version returning `null` if header is unknown                   |
 | `from(string $value)`                      | Built-in — creates from header string                                |
 | `tryFrom(string $value)`                   | Built-in — returns `null` if invalid                                 |
 
 > Example: `HttpHeader::fromString('content-type')` → `HttpHeader::CONTENT_TYPE`
+> Example: `HttpHeader::isRequestOnly()` / `HttpHeader::isResponseOnly()` for request/response-only checks
 
 ### 🔐 `AuthScheme`
 
@@ -418,8 +444,8 @@ Represents HTTP authentication schemes used in the `Authorization` and `WWW-Auth
 | `isTokenBased(): bool`              | Returns `true` for token-based authentication (`Bearer`, `OAuth`)                                  |
 | `isChallengeBased(): bool`          | Returns `true` for challenge-response schemes (`Basic`, `Digest`, `Negotiate`, `HOBA`, `Mutual`)   |
 | `isPasswordBased(): bool`           | Returns `true` for password-based schemes (`Basic`, `Digest`)                                      |
-| `fromHeader(string $header): ?self` | Extracts authentication scheme from `Authorization` header                                         |
-| `fromString(string $scheme)`        | Creates enum from scheme name (case-insensitive)                                                   |
+| `fromHeader(string $header): ?self` | Extracts authentication scheme from `Authorization` header (case-insensitive)                     |
+| `fromString(string $scheme)`        | Creates enum from scheme name (case-insensitive, trims input)                                      |
 | `tryFromString(string $scheme)`     | Same as above but returns `null` if invalid                                                        |
 | `from(string $value)`               | Built-in — creates enum from valid string                                                          |
 | `tryFrom(string $value)`            | Built-in — returns `null` if invalid                                                               |
@@ -430,6 +456,14 @@ Represents HTTP authentication schemes used in the `Authorization` and `WWW-Auth
 ### 🌐 `HttpVersion`
 
 Represents HTTP protocol versions.
+
+### ✅ `StatusCode` Helpers
+
+| Method                     | Description                                      |
+|---------------------------|--------------------------------------------------|
+| `statusClass(): int`      | Returns the status code class (1..5)             |
+| `category(): string`      | Returns semantic category (`success`, etc.)      |
+| `isCacheable(): bool`     | Returns `true` if cacheable by default (RFC 9111) |
 
 | Method                             | Description                                                     |
 |------------------------------------|-----------------------------------------------------------------|

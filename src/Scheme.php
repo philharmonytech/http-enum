@@ -96,11 +96,11 @@ enum Scheme: string
 
     public static function fromString(string $scheme): self
     {
-        return self::from(strtolower($scheme));
+        return self::from(strtolower(trim($scheme)));
     }
 
     public static function tryFromString(string $scheme): ?self
     {
-        return self::tryFrom(strtolower($scheme));
+        return self::tryFrom(strtolower(trim($scheme)));
     }
 }

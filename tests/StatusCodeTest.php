@@ -79,7 +79,46 @@ class StatusCodeTest extends TestCase
         }
     }
 
-    #[DataProvider('getPhraseDataProvider')]
+    public function testStatusClass(): void
+    {
+        $this->assertSame(1, StatusCode::CONTINUE->statusClass());
+        $this->assertSame(2, StatusCode::OK->statusClass());
+        $this->assertSame(3, StatusCode::MOVED_PERMANENTLY->statusClass());
+        $this->assertSame(4, StatusCode::BAD_REQUEST->statusClass());
+        $this->assertSame(5, StatusCode::INTERNAL_SERVER_ERROR->statusClass());
+    }
+
+    public function testCategory(): void
+    {
+        $this->assertSame('informational', StatusCode::CONTINUE->category());
+        $this->assertSame('success', StatusCode::OK->category());
+        $this->assertSame('redirection', StatusCode::MOVED_PERMANENTLY->category());
+        $this->assertSame('client_error', StatusCode::BAD_REQUEST->category());
+        $this->assertSame('server_error', StatusCode::INTERNAL_SERVER_ERROR->category());
+    }
+
+    public function testIsCacheable(): void
+    {
+        $expected = [
+            StatusCode::OK,
+            StatusCode::NON_AUTHORITATIVE_INFORMATION,
+            StatusCode::NO_CONTENT,
+            StatusCode::PARTIAL_CONTENT,
+            StatusCode::MULTIPLE_CHOICES,
+            StatusCode::MOVED_PERMANENTLY,
+            StatusCode::NOT_FOUND,
+            StatusCode::METHOD_NOT_ALLOWED,
+            StatusCode::GONE,
+            StatusCode::URI_TOO_LONG,
+            StatusCode::NOT_IMPLEMENTED,
+        ];
+
+        foreach (StatusCode::cases() as $case) {
+            $this->assertSame(\in_array($case, $expected, true), $case->isCacheable());
+        }
+    }
+
+    #[DataProvider('phraseDataProvider')]
     public function testPhraseReturnsCorrectString(
         int $statusCode,
         string $expectedMessage
@@ -90,7 +129,7 @@ class StatusCodeTest extends TestCase
     /**
      * @return array<string, array{statusCode: int, expectedMessage: string}>
      */
-    public static function getPhraseDataProvider(): array
+    public static function phraseDataProvider(): array
     {
         return [
             '100-Continue' => [
@@ -109,7 +148,6 @@ class StatusCodeTest extends TestCase
                 'statusCode' => 103,
                 'expectedMessage' => 'Early Hints',
             ],
-
             '200-OK' => [
                 'statusCode' => 200,
                 'expectedMessage' => 'OK',
@@ -242,7 +280,7 @@ class StatusCodeTest extends TestCase
             ],
             '413-Content Too Large' => [
                 'statusCode' => 413,
-                'expectedMessage' => 'Content Too Large',
+                'expectedMessage' => 'Payload Too Large',
             ],
             '414-URI Too Long' => [
                 'statusCode' => 414,
