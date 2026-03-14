@@ -254,7 +254,7 @@ enum ContentType: string
             }
 
             $q = 1.0;
-            foreach (array_slice($segments, 1) as $segment) {
+            foreach (\array_slice($segments, 1) as $segment) {
                 if (str_starts_with($segment, 'q=')) {
                     $qValue = (float) substr($segment, 2);
                     $q = max(0.0, min(1.0, $qValue));
