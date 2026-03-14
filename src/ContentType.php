@@ -291,17 +291,6 @@ enum ContentType: string
         return null;
     }
 
-    private static function acceptSpecificity(string $mime): int
-    {
-        if ($mime === '*/*') {
-            return 0;
-        }
-        if (str_ends_with($mime, '/*')) {
-            return 1;
-        }
-        return 2;
-    }
-
     public static function fromExtension(string $extension): ?self
     {
         $extension = strtolower(ltrim($extension, '.'));
@@ -387,5 +376,16 @@ enum ContentType: string
     public static function binary(): array
     {
         return array_values(array_filter(self::cases(), fn ($case) => $case->isBinary()));
+    }
+
+    private static function acceptSpecificity(string $mime): int
+    {
+        if ($mime === '*/*') {
+            return 0;
+        }
+        if (str_ends_with($mime, '/*')) {
+            return 1;
+        }
+        return 2;
     }
 }
