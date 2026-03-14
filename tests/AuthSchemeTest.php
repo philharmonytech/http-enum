@@ -24,11 +24,19 @@ class AuthSchemeTest extends TestCase
     public function testFromString(): void
     {
         $this->assertSame(AuthScheme::BEARER, AuthScheme::fromString('bearer'));
+        $this->assertSame(AuthScheme::OAUTH, AuthScheme::fromString('OAuth'));
+    }
+
+    public function testFromStringThrowsOnInvalid(): void
+    {
+        $this->expectException(\ValueError::class);
+        AuthScheme::fromString('unknown');
     }
 
     public function testTryFromString(): void
     {
         $this->assertSame(AuthScheme::BASIC, AuthScheme::tryFromString('BASIC'));
+        $this->assertSame(AuthScheme::HOBA, AuthScheme::tryFromString('hoba'));
     }
 
     public function testTryFromStringInvalid(): void

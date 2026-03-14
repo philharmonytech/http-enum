@@ -54,21 +54,34 @@ enum AuthScheme: string
 
         $scheme = explode(' ', $header, 2)[0];
 
-        return self::tryFrom(self::normalize($scheme));
+        return self::tryFromString($scheme);
     }
 
     public static function fromString(string $scheme): self
     {
-        return self::from(self::normalize($scheme));
+        $value = self::tryFromString($scheme);
+        if ($value === null) {
+            throw new \ValueError(\sprintf('Invalid auth scheme "%s"', $scheme));
+        }
+
+        return $value;
     }
 
     public static function tryFromString(string $scheme): ?self
     {
-        return self::tryFrom(self::normalize($scheme));
+        $normalized = self::normalize($scheme);
+
+        foreach (self::cases() as $case) {
+            if (strtolower($case->value) === $normalized) {
+                return $case;
+            }
+        }
+
+        return null;
     }
 
     private static function normalize(string $scheme): string
     {
-        return ucfirst(strtolower($scheme));
+        return strtolower(trim($scheme));
     }
 }
