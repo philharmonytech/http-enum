@@ -109,6 +109,40 @@ enum StatusCode: int
         return $this->isClientError() || $this->isServerError();
     }
 
+    public function statusClass(): int
+    {
+        return (int) floor($this->value / 100);
+    }
+
+    public function category(): string
+    {
+        return match ($this->statusClass()) {
+            1 => 'informational',
+            2 => 'success',
+            3 => 'redirection',
+            4 => 'client_error',
+            5 => 'server_error',
+            default => 'unknown',
+        };
+    }
+
+    public function isCacheable(): bool
+    {
+        return \in_array($this, [
+            self::OK,
+            self::NON_AUTHORITATIVE_INFORMATION,
+            self::NO_CONTENT,
+            self::PARTIAL_CONTENT,
+            self::MULTIPLE_CHOICES,
+            self::MOVED_PERMANENTLY,
+            self::NOT_FOUND,
+            self::METHOD_NOT_ALLOWED,
+            self::GONE,
+            self::URI_TOO_LONG,
+            self::NOT_IMPLEMENTED,
+        ], true);
+    }
+
     public function phrase(): string
     {
         return match ($this) {
@@ -148,7 +182,7 @@ enum StatusCode: int
             self::GONE => 'Gone',
             self::LENGTH_REQUIRED => 'Length Required',
             self::PRECONDITION_FAILED => 'Precondition Failed',
-            self::CONTENT_TOO_LARGE => 'Content Too Large',
+            self::CONTENT_TOO_LARGE => 'Payload Too Large',
             self::URI_TOO_LONG => 'URI Too Long',
             self::UNSUPPORTED_MEDIA_TYPE => 'Unsupported Media Type',
             self::RANGE_NOT_SATISFIABLE => 'Range Not Satisfiable',
