@@ -218,7 +218,7 @@ class ContentTypeTest extends TestCase
         $this->assertFalse(ContentType::JSON->matches('image/*'));
     }
 
-    #[DataProvider('getExtensionDataProvider')]
+    #[DataProvider('extensionDataProvider')]
     public function testFromExtensionReturnsCorrectType(
         string $extension,
         ?ContentType $expectedContentType
@@ -229,7 +229,7 @@ class ContentTypeTest extends TestCase
     /**
      * @return array<string, array{extension: string, expectedContentType: ContentType|null}>
      */
-    public static function getExtensionDataProvider(): array
+    public static function extensionDataProvider(): array
     {
         return [
             'Lower png extension' => [
@@ -452,6 +452,10 @@ class ContentTypeTest extends TestCase
                 'extension' => 'JSON',
                 'expectedContentType' => ContentType::JSON,
             ],
+            'Dot json extension' => [
+                'extension' => '.json',
+                'expectedContentType' => ContentType::JSON,
+            ],
             'Lower pdf extension' => [
                 'extension' => 'pdf',
                 'expectedContentType' => ContentType::PDF,
@@ -494,5 +498,67 @@ class ContentTypeTest extends TestCase
         $this->assertSame(ContentType::PNG, ContentType::fromHeader('image/png'));
         $this->assertNull(ContentType::fromHeader('invalid/type'));
         $this->assertNull(ContentType::fromHeader(''));
+    }
+
+    public function testFromFilename(): void
+    {
+        $this->assertSame(ContentType::PNG, ContentType::fromFilename('image.png'));
+        $this->assertSame(ContentType::ZIP, ContentType::fromFilename('archive.zip'));
+        $this->assertNull(ContentType::fromFilename('no-extension'));
+    }
+
+    public function testIsCompressible(): void
+    {
+        $this->assertTrue(ContentType::JSON->isCompressible());
+        $this->assertTrue(ContentType::HTML->isCompressible());
+        $this->assertFalse(ContentType::PNG->isCompressible());
+    }
+
+    public function testDefaultCharset(): void
+    {
+        $this->assertSame('utf-8', ContentType::JSON->defaultCharset());
+        $this->assertSame('utf-8', ContentType::TEXT->defaultCharset());
+        $this->assertNull(ContentType::PNG->defaultCharset());
+    }
+
+    public function testNegotiate(): void
+    {
+        $available = [ContentType::JSON, ContentType::HTML, ContentType::XML];
+
+        $this->assertSame(
+            ContentType::JSON,
+            ContentType::negotiate('application/json, text/html;q=0.9', $available)
+        );
+
+        $this->assertSame(
+            ContentType::HTML,
+            ContentType::negotiate('text/*;q=0.8, application/*;q=0.1', $available)
+        );
+
+        $this->assertNull(ContentType::negotiate('', $available));
+        $this->assertSame(
+            ContentType::JSON,
+            ContentType::negotiate('text/*;q=1.0, application/json;q=1.0', $available)
+        );
+        $this->assertSame(
+            ContentType::XML,
+            ContentType::negotiate('*/*;q=0.1, application/xml;q=0.5', $available)
+        );
+        $this->assertSame(
+            ContentType::JSON,
+            ContentType::negotiate('application/json,,text/html', $available)
+        );
+        $this->assertSame(
+            ContentType::JSON,
+            ContentType::negotiate(';q=0.9, application/json', $available)
+        );
+        $this->assertNull(ContentType::negotiate('application/unknown', $available));
+        $this->assertSame(
+            ContentType::XML,
+            ContentType::negotiate(
+                'application/xml, application/json',
+                [ContentType::JSON, ContentType::XML]
+            )
+        );
     }
 }
